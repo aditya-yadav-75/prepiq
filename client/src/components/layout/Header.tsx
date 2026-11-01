@@ -18,13 +18,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar, onNavigate }) => 
   });
 
   return (
-    <header className="sticky top-0 z-30 px-6 py-4 bg-white/70 dark:bg-[#050B1E]/75 backdrop-blur-2xl backdrop-saturate-150 border-b border-slate-200/60 dark:border-white/10 shadow-[0_4px_20px_0_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_0_rgba(0,0,0,0.25)] transition-colors">
+    <header className="sticky top-0 z-30 px-6 py-3.5 liquid-glass-nav border-b transition-all">
       <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
         {/* Left: Mobile Toggle & Greeting */}
         <div className="flex items-center gap-3">
           <button
             onClick={onOpenSidebar}
-            className="p-2 rounded-xl text-darkText dark:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 lg:hidden"
+            className="p-2 rounded-xl text-darkText dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.08] lg:hidden transition-colors"
+            aria-label="Open navigation menu"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -39,7 +40,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar, onNavigate }) => 
         {/* Right: AI Engine Status, Quick Action & Notifications */}
         <div className="flex items-center gap-3">
           {/* AI Model Indicator Pill */}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 shadow-xs text-xs font-semibold text-darkText dark:text-slate-200">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass-pill text-xs font-semibold text-darkText dark:text-slate-200">
             <span className="w-2 h-2 rounded-full bg-neon-lime shadow-glow-lime animate-pulse" />
             <Cpu className="w-3.5 h-3.5 text-cobalt dark:text-neon-lime" />
             <span>{geminiKey ? 'Gemini 1.5 Flash' : 'Hybrid AI Engine'}</span>
@@ -57,16 +58,19 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar, onNavigate }) => 
 
           {/* Notifications */}
           <div className="relative">
-            <button className="p-2.5 rounded-xl bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-mutedText dark:text-slate-300 hover:text-darkText dark:hover:text-white border border-slate-200/80 dark:border-white/10 transition-colors shadow-xs">
+            <button 
+              className="p-2.5 rounded-xl liquid-glass-pill hover:bg-white/70 dark:hover:bg-white/10 text-mutedText dark:text-slate-300 hover:text-darkText dark:hover:text-white transition-colors"
+              aria-label="Notifications"
+            >
               <Bell className="w-4 h-4" />
             </button>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-neon-lime ring-2 ring-white dark:ring-slate-900" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-neon-lime ring-2 ring-white/80 dark:ring-slate-900" />
           </div>
 
           {/* Profile Avatar */}
           <div 
             onClick={() => onNavigate('settings')}
-            className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm cursor-pointer shadow-sm hover:ring-2 hover:ring-cobalt/30 transition-all select-none"
+            className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm cursor-pointer shadow-sm ring-1 ring-black/10 dark:ring-white/20 hover:scale-105 transition-all select-none"
             style={{ backgroundColor: user?.avatar_color || '#1649E8' }}
           >
             {user?.name?.charAt(0).toUpperCase() || 'S'}

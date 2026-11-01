@@ -89,7 +89,12 @@ const MainApp: React.FC = () => {
         </>
       ) : (
         /* AUTHENTICATED DASHBOARD LAYOUT */
-        <div className="flex flex-1">
+        <div className="flex flex-1 relative min-h-screen">
+          {/* Subtle Apple-style atmospheric light blooms for Liquid Glass refraction */}
+          <div className="fixed top-0 left-0 w-[550px] h-[350px] bg-gradient-to-br from-cobalt/[0.05] via-electric/[0.02] to-transparent dark:from-cobalt/[0.12] dark:via-electric/[0.05] blur-[130px] rounded-full pointer-events-none -z-10" />
+          <div className="fixed top-36 right-10 w-[450px] h-[320px] bg-gradient-to-bl from-neon-lime/[0.04] via-cobalt/[0.02] to-transparent dark:from-neon-lime/[0.08] dark:via-cobalt/[0.05] blur-[140px] rounded-full pointer-events-none -z-10" />
+          <div className="fixed bottom-10 left-1/4 w-[600px] h-[350px] bg-gradient-to-tr from-electric/[0.02] to-transparent dark:from-cobalt/[0.07] blur-[150px] rounded-full pointer-events-none -z-10" />
+
           {/* Sidebar */}
           <Sidebar
             currentPage={nav.page}
@@ -99,7 +104,7 @@ const MainApp: React.FC = () => {
           />
 
           {/* Main Body */}
-          <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
+          <div className="flex-1 flex flex-col min-w-0 lg:pl-72 relative z-0">
             <Header
               onOpenSidebar={() => setIsSidebarOpen(true)}
               onNavigate={navigate}

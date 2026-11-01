@@ -60,14 +60,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Sidebar Container - Apple Liquid Glass Aesthetic */}
       <aside className={`
         fixed top-0 bottom-0 left-0 z-50 w-72 
-        bg-white/80 dark:bg-[#070E28]/85 backdrop-blur-2xl
-        border-r border-slate-200/80 dark:border-white/10
-        shadow-[4px_0_24px_0_rgba(0,0,0,0.04)] dark:shadow-[4px_0_24px_0_rgba(0,0,0,0.35)]
+        liquid-glass-sidebar border-r
         flex flex-col transition-transform duration-300 ease-in-out
         lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Brand Header */}
-        <div className="p-6 pb-4 flex items-center justify-between border-b border-slate-100/80 dark:border-white/10">
+        <div className="p-6 pb-4 flex items-center justify-between border-b border-black/[0.05] dark:border-white/[0.08]">
           <div 
             onClick={() => handleNav('dashboard')}
             className="flex items-center gap-3 cursor-pointer group select-none"
@@ -90,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <button 
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-darkText dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-darkText dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.08] lg:hidden transition-colors"
             aria-label="Close sidebar"
           >
             <X className="w-5 h-5" />
@@ -115,7 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     ? 'text-white' 
                     : item.highlight
                     ? 'bg-neon-lime/20 dark:bg-neon-lime/10 text-navy-deep dark:text-neon-lime border border-neon-lime/40 dark:border-neon-lime/20 hover:bg-neon-lime/30'
-                    : 'text-darkText dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-cobalt dark:hover:text-white'}
+                    : 'text-darkText dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:text-cobalt dark:hover:text-white'}
                 `}
               >
                 {/* Fluid Spring-like Active Navigation Indicator */}
@@ -146,10 +144,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* User Profile Card & Sign Out */}
-        <div className="p-4 border-t border-slate-100/80 dark:border-white/10 bg-slate-50/50 dark:bg-slate-900/40 backdrop-blur-md">
-          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-slate-200/70 dark:border-white/10 mb-2 shadow-xs">
+        <div className="p-4 border-t border-black/[0.05] dark:border-white/[0.08] bg-transparent">
+          <div className="flex items-center gap-3 p-2.5 rounded-2xl liquid-glass-pill mb-2">
             <div 
-              className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm shrink-0"
+              className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm ring-1 ring-black/10 dark:ring-white/20 shrink-0"
               style={{ backgroundColor: user?.avatar_color || '#1649E8' }}
             >
               {user?.name?.charAt(0).toUpperCase() || 'S'}
@@ -164,7 +162,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               logout();
               handleNav('landing');
             }}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50/70 dark:hover:bg-rose-950/30 rounded-xl transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" />
             Sign Out
