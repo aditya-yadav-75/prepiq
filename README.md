@@ -46,15 +46,19 @@ Traditional approaches often suffer from:
 |---|---|
 | Live Application | https://prepiq-upc7.onrender.com/ |
 | GitHub Repository | https://github.com/aditya-yadav-75/prepiq |
-| Project Demonstration | **[Add your video link here]** |
 
 ### Project Demonstration Video
 
 Watch the complete walkthrough of PrepIQ, including document uploads, AI question generation, practice examinations, automated evaluation, and performance analytics.
 
-**Video Link:** `PASTE_YOUR_YOUTUBE_OR_GOOGLE_DRIVE_LINK_HERE`
 
-<!-- Optional: Replace the placeholder above with a YouTube thumbnail link when your video is uploaded. -->
+
+https://github.com/user-attachments/assets/3ce09f4a-61e8-49a2-9ee1-58dbe6512d6c
+
+
+
+
+
 
 ---
 
