@@ -8,7 +8,7 @@ interface NavbarProps {
   currentPage: string;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage }) => {
   const { user } = useAuth();
 
   const handleLaunch = () => {
@@ -20,8 +20,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/85 dark:bg-[#070E28]/90 backdrop-blur-md border-b border-slate-200/70 dark:border-white/10 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+    <header className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-4xl transition-all duration-300">
+      <nav 
+        className="
+          flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3
+          rounded-full
+          bg-white/70 dark:bg-slate-900/75
+          backdrop-blur-2xl backdrop-saturate-150
+          border border-white/80 dark:border-white/10
+          shadow-[0_8px_32px_0_rgba(0,0,0,0.08),inset_0_1px_1px_0_rgba(255,255,255,0.8)]
+          dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.1)]
+        "
+        aria-label="Public Navigation"
+      >
         {/* Left: Brand Identity */}
         <div 
           onClick={() => onNavigate('landing')}
@@ -35,7 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             <span className="text-xl font-extrabold tracking-tight text-darkText dark:text-white">
               Prep<span className="text-cobalt dark:text-neon-lime">IQ</span>
             </span>
-            <span className="px-1.5 py-0.5 text-[10px] font-black uppercase bg-neon-lime text-navy-deep rounded-md tracking-wider">
+            <span className="px-1.5 py-0.5 text-[10px] font-black uppercase bg-neon-lime text-navy-deep rounded-md tracking-wider shadow-xs">
               AI
             </span>
           </div>
@@ -45,7 +56,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => onNavigate('login')}
-            className="px-3.5 py-2 text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-cobalt dark:hover:text-neon-lime rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-all"
+            className={`
+              px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-bold rounded-full transition-all
+              ${currentPage === 'login'
+                ? 'bg-slate-100 dark:bg-slate-800 text-cobalt dark:text-neon-lime shadow-xs'
+                : 'text-slate-700 dark:text-slate-200 hover:text-cobalt dark:hover:text-neon-lime hover:bg-slate-100/70 dark:hover:bg-slate-800/60'}
+            `}
           >
             Login
           </button>
@@ -53,13 +69,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             variant="lime"
             size="sm"
             onClick={handleLaunch}
-            icon={<Sparkles className="w-4 h-4 text-navy-deep" />}
-            className="shadow-xs font-bold"
+            icon={<Sparkles className="w-3.5 h-3.5 text-navy-deep" />}
+            className="rounded-full shadow-xs font-bold text-xs sm:text-sm px-4 py-1.5"
           >
             Launch App
           </Button>
         </div>
-      </div>
+      </nav>
     </header>
   );
 };

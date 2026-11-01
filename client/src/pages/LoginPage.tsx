@@ -22,7 +22,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
     setError('');
     setIsLoading(true);
     try {
-      await login(email);
+      await login(email, password, false);
       onNavigate('dashboard');
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check your credentials.');
@@ -32,9 +32,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   };
 
   const handleDemoLogin = async () => {
+    setError('');
     setIsLoading(true);
     try {
-      await login('student@prepiq.edu', true);
+      await login('student@prepiq.edu', 'password123', true);
       onNavigate('dashboard');
     } catch (err: any) {
       setError(err.message || 'Demo login failed');
@@ -44,7 +45,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[85vh] flex items-center justify-center px-4 pt-24 pb-12 sm:pt-28">
       <div className="w-full max-w-md space-y-6">
         {/* Brand header */}
         <div className="text-center space-y-2">

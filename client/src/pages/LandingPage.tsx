@@ -45,7 +45,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   return (
     <div className="space-y-24 pb-20">
       {/* HERO SECTION */}
-      <section className="relative pt-12 sm:pt-20 overflow-hidden">
+      <section className="relative pt-24 sm:pt-32 overflow-hidden">
         {/* Ambient liquid glow background */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-cobalt/20 via-electric/15 to-neon-lime/20 blur-3xl -z-10 rounded-full pointer-events-none" />
 

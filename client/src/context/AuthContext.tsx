@@ -7,8 +7,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   geminiKey: string;
-  login: (email: string, isDemo?: boolean) => Promise<void>;
-  register: (data: { name: string; email: string; college?: string; course?: string; year_of_study?: string }) => Promise<void>;
+  login: (email: string, password?: string, isDemo?: boolean) => Promise<void>;
+  register: (data: { name: string; email: string; password?: string; college?: string; course?: string; year_of_study?: string }) => Promise<void>;
   logout: () => void;
   updateUser: (data: Partial<UserProfile>) => Promise<void>;
   saveGeminiKey: (key: string) => void;
@@ -41,10 +41,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, isDemo = false) => {
+  const login = async (email: string, password?: string, isDemo = false) => {
     setIsLoading(true);
     try {
-      const res = await api.login(email, isDemo);
+      const res = await api.login(email, password, isDemo);
       setUser(res.user);
       localStorage.setItem('prepiq_user', JSON.stringify(res.user));
     } finally {
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (data: { name: string; email: string; college?: string; course?: string; year_of_study?: string }) => {
+  const register = async (data: { name: string; email: string; password?: string; college?: string; course?: string; year_of_study?: string }) => {
     setIsLoading(true);
     try {
       const res = await api.register(data);
@@ -66,6 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem('prepiq_user');
+    sessionStorage.removeItem('prepiq_active_page');
   };
 
   const updateUser = async (data: Partial<UserProfile>) => {

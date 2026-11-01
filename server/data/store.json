@@ -324,5 +324,8 @@
         ]
       }
     }
+  },
+  "passwords": {
+    "demo-student-001": "692a8a830f512f831722f78dd900be75:57ddc981ce6ad371c46888f34f7307d79f1a614c46ca812db271a5210bedb911a978a7bd0163b642f2e7e856ebc7962084527d968cc282028f022caa4c1ad62e"
   }
 }

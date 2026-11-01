@@ -54,16 +54,16 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 export const api = {
   // Auth
-  async login(email: string, isDemo = false): Promise<{ success: boolean; user: UserProfile }> {
+  async login(email: string, password?: string, isDemo = false): Promise<{ success: boolean; user: UserProfile }> {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ email, isDemo })
+      body: JSON.stringify({ email, password, isDemo })
     });
     return handleResponse<{ success: boolean; user: UserProfile }>(res);
   },
 
-  async register(data: { name: string; email: string; college?: string; course?: string; year_of_study?: string }): Promise<{ success: boolean; user: UserProfile }> {
+  async register(data: { name: string; email: string; password?: string; college?: string; course?: string; year_of_study?: string }): Promise<{ success: boolean; user: UserProfile }> {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: getHeaders(),

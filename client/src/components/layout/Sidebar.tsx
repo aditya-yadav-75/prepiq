@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
   Sparkles, 
@@ -7,7 +8,6 @@ import {
   BarChart3, 
   Settings, 
   LogOut, 
-  CheckCircle2, 
   ShieldCheck, 
   Layers, 
   Code2,
@@ -57,15 +57,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
-      {/* Sidebar Container */}
+      {/* Sidebar Container - Apple Liquid Glass Aesthetic */}
       <aside className={`
         fixed top-0 bottom-0 left-0 z-50 w-72 
-        bg-white/85 dark:bg-[#070E28]/90 backdrop-blur-glass-heavy border-r border-slate-200/80 dark:border-white/10 shadow-glass dark:shadow-glass-dark
+        bg-white/80 dark:bg-[#070E28]/85 backdrop-blur-2xl
+        border-r border-slate-200/80 dark:border-white/10
+        shadow-[4px_0_24px_0_rgba(0,0,0,0.04)] dark:shadow-[4px_0_24px_0_rgba(0,0,0,0.35)]
         flex flex-col transition-transform duration-300 ease-in-out
         lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Brand Header */}
-        <div className="p-6 pb-4 flex items-center justify-between border-b border-slate-100 dark:border-white/10">
+        <div className="p-6 pb-4 flex items-center justify-between border-b border-slate-100/80 dark:border-white/10">
           <div 
             onClick={() => handleNav('dashboard')}
             className="flex items-center gap-3 cursor-pointer group select-none"
@@ -76,21 +78,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-black tracking-tight text-darkText dark:text-white">Prep<span className="text-cobalt dark:text-neon-lime">IQ</span></span>
-                <span className="px-1.5 py-0.5 text-[9px] font-black uppercase bg-neon-lime text-navy-deep rounded-md">PRO</span>
+                <span className="text-xl font-black tracking-tight text-darkText dark:text-white">
+                  Prep<span className="text-cobalt dark:text-neon-lime">IQ</span>
+                </span>
+                <span className="px-1.5 py-0.5 text-[9px] font-black uppercase bg-neon-lime text-navy-deep rounded-md shadow-xs">
+                  PRO
+                </span>
               </div>
               <p className="text-[11px] font-medium text-mutedText dark:text-slate-400">Exam Generator</p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-darkText dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-darkText dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden"
+            aria-label="Close sidebar"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Navigation Items */}
+        {/* Navigation Items with Animated Liquid Glass Indicator */}
         <div className="flex-1 overflow-y-auto px-4 py-5 space-y-1.5">
           <div className="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-mutedText dark:text-slate-500">
             Core Workspace
@@ -103,29 +110,46 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 key={item.id}
                 onClick={() => handleNav(item.id)}
                 className={`
-                  w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-left
+                  relative w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-left
                   ${isActive 
-                    ? 'bg-cobalt text-white shadow-md shadow-cobalt/25 dark:shadow-glow-blue' 
+                    ? 'text-white' 
                     : item.highlight
                     ? 'bg-neon-lime/20 dark:bg-neon-lime/10 text-navy-deep dark:text-neon-lime border border-neon-lime/40 dark:border-neon-lime/20 hover:bg-neon-lime/30'
-                    : 'text-darkText dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-cobalt dark:hover:text-white'}
+                    : 'text-darkText dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-cobalt dark:hover:text-white'}
                 `}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-neon-lime' : item.highlight ? 'text-cobalt dark:text-neon-lime' : 'text-mutedText dark:text-slate-400'}`} />
-                <span className="truncate flex-1">{item.label}</span>
+                {/* Fluid Spring-like Active Navigation Indicator */}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeSidebarIndicator"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    className="absolute inset-0 bg-cobalt rounded-xl shadow-md shadow-cobalt/30 dark:shadow-glow-blue z-0 border border-white/20"
+                  />
+                )}
+
+                <Icon 
+                  className={`relative z-10 w-4 h-4 shrink-0 transition-colors ${
+                    isActive 
+                      ? 'text-neon-lime' 
+                      : item.highlight 
+                      ? 'text-cobalt dark:text-neon-lime' 
+                      : 'text-mutedText dark:text-slate-400'
+                  }`} 
+                />
+                <span className="relative z-10 truncate flex-1">{item.label}</span>
                 {item.highlight && !isActive && (
-                  <span className="w-2 h-2 rounded-full bg-neon-lime animate-pulse" />
+                  <span className="relative z-10 w-2 h-2 rounded-full bg-neon-lime animate-pulse shadow-glow-lime" />
                 )}
               </button>
             );
           })}
         </div>
 
-        {/* User Card & Logout */}
-        <div className="p-4 border-t border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-slate-900/50">
-          <div className="flex items-center gap-3 p-2 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-slate-200/70 dark:border-white/10 mb-2">
+        {/* User Profile Card & Sign Out */}
+        <div className="p-4 border-t border-slate-100/80 dark:border-white/10 bg-slate-50/50 dark:bg-slate-900/40 backdrop-blur-md">
+          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/70 dark:bg-slate-800/70 border border-slate-200/70 dark:border-white/10 mb-2 shadow-xs">
             <div 
-              className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm"
+              className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm shadow-sm shrink-0"
               style={{ backgroundColor: user?.avatar_color || '#1649E8' }}
             >
               {user?.name?.charAt(0).toUpperCase() || 'S'}

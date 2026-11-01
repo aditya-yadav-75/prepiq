@@ -51,6 +51,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
       await register({
         name,
         email,
+        password,
         college,
         course,
         year_of_study: yearOfStudy
@@ -64,7 +65,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[90vh] flex items-center justify-center px-4 pt-24 pb-12 sm:pt-28">
       <div className="w-full max-w-lg space-y-6">
         <div className="text-center space-y-2">
           <div 

@@ -27,13 +27,42 @@ interface NavigationState {
   params?: any;
 }
 
+const getInitialNav = (): NavigationState => {
+  // If user session is already present in localStorage, restore active workspace view directly
+  const storedUser = localStorage.getItem('prepiq_user');
+  if (storedUser) {
+    try {
+      const parsed = JSON.parse(storedUser);
+      if (parsed && parsed.id) {
+        const savedPage = sessionStorage.getItem('prepiq_active_page');
+        const validPages = [
+          'dashboard', 'upload', 'generate', 'test', 'results',
+          'tests', 'materials', 'analytics', 'prompts',
+          'test-suite', 'workflow', 'settings'
+        ];
+        if (savedPage && validPages.includes(savedPage)) {
+          return { page: savedPage };
+        }
+        return { page: 'dashboard' };
+      }
+    } catch (_) {}
+  }
+  return { page: 'landing' };
+};
+
 const MainApp: React.FC = () => {
   const { user, isLoading } = useAuth();
-  const [nav, setNav] = useState<NavigationState>({ page: 'landing' });
+  const [nav, setNav] = useState<NavigationState>(getInitialNav);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navigate = (page: string, params?: any) => {
     setNav({ page, params });
+    const isPublic = page === 'landing' || page === 'login' || page === 'register';
+    if (!isPublic) {
+      sessionStorage.setItem('prepiq_active_page', page);
+    } else {
+      sessionStorage.removeItem('prepiq_active_page');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

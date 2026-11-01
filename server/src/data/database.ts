@@ -8,9 +8,11 @@ import {
   PerformanceAnalytics 
 } from '../types/index.js';
 import { SAMPLE_MATERIALS } from './sampleMaterials.js';
+import { hashPassword } from '../utils/security.js';
 
 interface DatabaseSchema {
   users: Record<string, UserProfile>;
+  passwords?: Record<string, string>;
   documents: Record<string, StudyDocument>;
   tests: Record<string, PracticeTest>;
   attempts: Record<string, TestAttempt>;
@@ -40,6 +42,12 @@ class Database {
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         this.data = JSON.parse(raw);
+        if (!this.data.passwords) {
+          this.data.passwords = {};
+        }
+        if (!this.data.passwords['demo-student-001']) {
+          this.data.passwords['demo-student-001'] = hashPassword('password123');
+        }
       } else {
         this.seedDemoData();
       }
@@ -74,6 +82,9 @@ class Database {
 
     this.data.users = {
       [demoUser.id]: demoUser
+    };
+    this.data.passwords = {
+      [demoUser.id]: hashPassword('password123')
     };
 
     // Pre-populate sample materials
@@ -334,6 +345,18 @@ class Database {
   public saveUser(user: UserProfile): void {
     this.data.users[user.id] = user;
     this.persist();
+  }
+
+  public setUserPassword(userId: string, hash: string): void {
+    if (!this.data.passwords) {
+      this.data.passwords = {};
+    }
+    this.data.passwords[userId] = hash;
+    this.persist();
+  }
+
+  public getUserPassword(userId: string): string | undefined {
+    return this.data.passwords ? this.data.passwords[userId] : undefined;
   }
 
   // Document operations

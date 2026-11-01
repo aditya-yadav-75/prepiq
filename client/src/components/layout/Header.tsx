@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar, onNavigate }) => 
   });
 
   return (
-    <header className="sticky top-0 z-30 px-6 py-4 bg-softBg/85 dark:bg-[#050B1E]/85 backdrop-blur-md border-b border-slate-200/60 dark:border-white/10">
+    <header className="sticky top-0 z-30 px-6 py-4 bg-white/70 dark:bg-[#050B1E]/75 backdrop-blur-2xl backdrop-saturate-150 border-b border-slate-200/60 dark:border-white/10 shadow-[0_4px_20px_0_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_0_rgba(0,0,0,0.25)] transition-colors">
       <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
         {/* Left: Mobile Toggle & Greeting */}
         <div className="flex items-center gap-3">
