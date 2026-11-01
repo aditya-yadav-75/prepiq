@@ -1,10 +1,11 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { TestSuiteRunner } from '../services/testSuiteRunner.js';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const testSuiteRouter = Router();
 
-// Run all test cases (Test 1 through Test 6)
-testSuiteRouter.post('/run-all', async (_req, res) => {
+// Run all test cases (Test 1 through Test 6) - Protected endpoint
+testSuiteRouter.post('/run-all', requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
   try {
     const results = await TestSuiteRunner.runAllTests();
     const passedCount = results.filter(r => r.status === 'passed').length;
@@ -20,10 +21,11 @@ testSuiteRouter.post('/run-all', async (_req, res) => {
   }
 });
 
-// Run a single test case
-testSuiteRouter.post('/run/:id', async (req, res) => {
+// Run a single test case - Protected endpoint
+testSuiteRouter.post('/run/:id', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const id = req.params.id.toUpperCase();
+    const idParam = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const id = idParam.toUpperCase();
     let result;
 
     if (id === 'TEST-1' || id === '1') {

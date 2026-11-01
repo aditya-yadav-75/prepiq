@@ -6,6 +6,11 @@ import path from 'path';
 // Load environment variables
 dotenv.config();
 
+import { validateJwtConfiguration } from './utils/jwt.js';
+
+// Enforce strict security validation at boot: fails immediately if JWT_SECRET is missing or weak (< 32 chars)
+validateJwtConfiguration();
+
 import { authRouter } from './routes/auth.js';
 import { documentsRouter } from './routes/documents.js';
 import { generateRouter } from './routes/generate.js';
@@ -28,22 +33,46 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Hardened CORS policy
+// Configurable CORS Allowlist
+const rawCorsOrigin = process.env.CORS_ORIGIN;
+const defaultAllowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5001',
+  'http://127.0.0.1:5001',
+  'https://prepiq-upc7.onrender.com'
+];
+const allowedOrigins = rawCorsOrigin
+  ? rawCorsOrigin.split(',').map(o => o.trim()).filter(Boolean)
+  : defaultAllowedOrigins;
+
 app.use(cors({
-  origin: '*',
+  origin: (origin, callback) => {
+    // Allow requests with no origin header (same-origin, curl, mobile, or backend-to-backend)
+    if (!origin) return callback(null, true);
+
+    const isExplicitlyAllowed = allowedOrigins.includes(origin) || allowedOrigins.includes('*');
+    if (isExplicitlyAllowed) {
+      return callback(null, true);
+    }
+
+    // Log rejected cross-origin attempt and disallow
+    console.warn(`[CORS REJECTED] Origin ${origin} not in allowlist`);
+    callback(new Error('Cross-Origin Request Blocked by PrepIQ Security Policy'));
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-gemini-key']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-gemini-key'],
+  credentials: true
 }));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health Check
+// Safe Public Health Check (Reveals zero sensitive architecture secrets)
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'healthy',
     service: 'PrepIQ API Server',
-    auth_mode: 'JWT Bearer (HS256)',
     timestamp: new Date().toISOString()
   });
 });
@@ -70,7 +99,7 @@ app.get('*', (req, res, next) => {
 
 // Centralized API Error Handling Middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('[UNHANDLED SERVER ERROR]', err);
+  console.error('[UNHANDLED SERVER ERROR]', err?.message || err);
   const status = err.status || 500;
   const message = process.env.NODE_ENV === 'production' 
     ? 'An unexpected error occurred. Please try again later.' 

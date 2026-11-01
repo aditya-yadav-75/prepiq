@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, ArrowRight, Mail, Lock, Info } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 import { Button } from '../components/ui/Button.js';
 import { GlassCard } from '../components/ui/GlassCard.js';
-import { api } from '../services/api.js';
 
 interface LoginPageProps {
   onNavigate: (page: string) => void;
@@ -16,14 +15,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
-  const [statusMessage, setStatusMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setStatusMessage('');
     setIsLoading(true);
     try {
       await login(email, password, rememberMe);
@@ -32,25 +28,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    setError('');
-    setStatusMessage('');
-    if (!email || !email.trim()) {
-      setError('Please enter your registered email address above first.');
-      return;
-    }
-    setIsResetting(true);
-    try {
-      const res = await api.forgotPassword(email);
-      setStatusMessage(res.message);
-    } catch (err: any) {
-      setError(err.message || 'Unable to submit password reset request.');
-    } finally {
-      setIsResetting(false);
     }
   };
 
@@ -88,13 +65,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
             </div>
           )}
 
-          {statusMessage && (
-            <div className="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs text-cobalt dark:text-blue-300 font-medium flex items-start gap-2.5">
-              <Info className="w-4 h-4 shrink-0 text-cobalt dark:text-blue-400 mt-0.5" />
-              <span>{statusMessage}</span>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-darkText dark:text-slate-300 uppercase tracking-wider mb-1.5">
@@ -118,14 +88,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                 <label className="text-xs font-bold text-darkText dark:text-slate-300 uppercase tracking-wider">
                   Password
                 </label>
-                <button 
-                  type="button"
-                  onClick={handleForgotPassword}
-                  disabled={isResetting}
-                  className="text-xs font-semibold text-cobalt dark:text-neon-lime hover:underline"
-                >
-                  {isResetting ? 'Submitting...' : 'Forgot?'}
-                </button>
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-mutedText dark:text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />

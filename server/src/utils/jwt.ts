@@ -1,12 +1,32 @@
 import crypto from 'crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'prepiq-academic-saas-hmac-sha256-secret-key-2026';
-
 export interface TokenPayload {
   id: string;
   email: string;
-  iat?: number;
-  exp?: number;
+  iat: number;
+  exp: number;
+}
+
+/**
+ * Retrieve the JWT_SECRET from environment variables.
+ * Fails safely and immediately if missing or weak.
+ */
+export function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || typeof secret !== 'string' || secret.trim().length < 32) {
+    throw new Error(
+      'FATAL CONFIGURATION ERROR: JWT_SECRET environment variable is missing, empty, or too weak. ' +
+      'A cryptographically secure secret of at least 32 characters is strictly required.'
+    );
+  }
+  return secret.trim();
+}
+
+/**
+ * Validate JWT configuration on server startup.
+ */
+export function validateJwtConfiguration(): void {
+  getJwtSecret();
 }
 
 function base64url(input: string | Buffer): string {
@@ -17,10 +37,12 @@ function base64url(input: string | Buffer): string {
  * Sign a JWT token with HS256 HMAC-SHA256
  */
 export function signToken(payload: { id: string; email: string }, expiresInSeconds = 7 * 86400): string {
+  const secret = getJwtSecret();
   const header = { alg: 'HS256', typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
   const fullPayload: TokenPayload = {
-    ...payload,
+    id: payload.id,
+    email: payload.email,
     iat: now,
     exp: now + expiresInSeconds
   };
@@ -30,7 +52,7 @@ export function signToken(payload: { id: string; email: string }, expiresInSecon
   const data = `${encodedHeader}.${encodedPayload}`;
 
   const signature = crypto
-    .createHmac('sha256', JWT_SECRET)
+    .createHmac('sha256', secret)
     .update(data)
     .digest('base64url');
 
@@ -38,7 +60,7 @@ export function signToken(payload: { id: string; email: string }, expiresInSecon
 }
 
 /**
- * Verify a JWT token signature and expiration
+ * Verify a JWT token signature, algorithm, expiration, and payload structure
  */
 export function verifyToken(token: string): TokenPayload | null {
   try {
@@ -50,8 +72,15 @@ export function verifyToken(token: string): TokenPayload | null {
     const [encodedHeader, encodedPayload, signature] = parts;
     const data = `${encodedHeader}.${encodedPayload}`;
 
+    // Validate algorithm header strictly against algorithm-switching attacks
+    const header = JSON.parse(Buffer.from(encodedHeader, 'base64url').toString('utf8'));
+    if (!header || header.alg !== 'HS256' || header.typ !== 'JWT') {
+      return null;
+    }
+
+    const secret = getJwtSecret();
     const expectedSig = crypto
-      .createHmac('sha256', JWT_SECRET)
+      .createHmac('sha256', secret)
       .update(data)
       .digest('base64url');
 
@@ -65,9 +94,17 @@ export function verifyToken(token: string): TokenPayload | null {
       Buffer.from(encodedPayload, 'base64url').toString('utf8')
     );
 
+    if (!payload || typeof payload !== 'object' || !payload.id || !payload.email) {
+      return null;
+    }
+
     const now = Math.floor(Date.now() / 1000);
-    if (payload.exp && payload.exp < now) {
+    if (typeof payload.exp !== 'number' || payload.exp < now) {
       return null; // Expired
+    }
+
+    if (typeof payload.iat !== 'number' || payload.iat > now + 60) {
+      return null; // Issued in future beyond tolerable clock skew
     }
 
     return payload;

@@ -70,15 +70,6 @@ export const api = {
     return handleResponse<{ success: boolean; user: UserProfile; token: string }>(res);
   },
 
-  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
-    const res = await fetch(`${API_BASE}/auth/forgot-password`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ email })
-    });
-    return handleResponse<{ success: boolean; message: string }>(res);
-  },
-
   async getCurrentUser(): Promise<UserProfile> {
     const res = await fetch(`${API_BASE}/auth/me`, {
       headers: getHeaders()

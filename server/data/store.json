@@ -9,47 +9,10 @@
       "year_of_study": "3rd Year",
       "created_at": "2026-10-18T08:01:49.685Z",
       "avatar_color": "#1649E8"
-    },
-    "user-1793544739439": {
-      "id": "user-1793544739439",
-      "name": "Alice Security Student",
-      "email": "alice.audit.1793544739439@university.edu",
-      "college": "Dept of Computer Science",
-      "course": "Operating Systems",
-      "year_of_study": "3rd Year",
-      "created_at": "2026-11-01T14:52:19.439Z",
-      "avatar_color": "#4d78ff"
-    },
-    "user-1793544739500": {
-      "id": "user-1793544739500",
-      "name": "Bob Peer Student",
-      "email": "bob.peer.1793544739500@university.edu",
-      "college": "Dept of Informatics",
-      "course": "Data Science",
-      "year_of_study": "2nd Year",
-      "created_at": "2026-11-01T14:52:19.500Z",
-      "avatar_color": "#245BFF"
-    },
-    "user-1793544760791": {
-      "id": "user-1793544760791",
-      "name": "Alice Security Student",
-      "email": "alice.audit.1793544760790@university.edu",
-      "college": "Dept of Computer Science",
-      "course": "Operating Systems",
-      "year_of_study": "3rd Year",
-      "created_at": "2026-11-01T14:52:40.791Z",
-      "avatar_color": "#245BFF"
-    },
-    "user-1793544760872": {
-      "id": "user-1793544760872",
-      "name": "Bob Peer Student",
-      "email": "bob.peer.1793544760872@university.edu",
-      "college": "Dept of Informatics",
-      "course": "Data Science",
-      "year_of_study": "2nd Year",
-      "created_at": "2026-11-01T14:52:40.872Z",
-      "avatar_color": "#245BFF"
     }
+  },
+  "passwords": {
+    "demo-student-001": "692a8a830f512f831722f78dd900be75:57ddc981ce6ad371c46888f34f7307d79f1a614c46ca812db271a5210bedb911a978a7bd0163b642f2e7e856ebc7962084527d968cc282028f022caa4c1ad62e"
   },
   "documents": {
     "doc-os-001": {
@@ -91,46 +54,6 @@
       "word_count": 820,
       "extracted_text": "SECTION 1: SUPERVISED LEARNING PARADIGM\nSupervised learning algorithms build mathematical models from training datasets containing input features (X) and corresponding ground-truth target labels (y). The primary objective is to learn a mapping function f: X -> y that generalizes accurately to unseen test instances.\n- Regression: Predicts continuous numerical targets (e.g., house prices, temperatures). Standard loss: Mean Squared Error (MSE) or Mean Absolute Error (MAE).\n- Classification: Predicts discrete categorical labels (e.g., spam vs. non-spam, tumor malignancy). Standard loss: Binary Cross-Entropy or Multiclass Categorical Cross-Entropy.\n\nSECTION 2: BIAS-VARIANCE TRADEOFF AND GENERALIZATION ERROR\nThe total expected generalization error of any predictive model decomposes into three components:\nTotal Error = Bias^2 + Variance + Irreducible Error.\n- High Bias (Underfitting): The model makes overly simplistic assumptions, failing to capture underlying trends in data. Exhibits high training error and high validation error.\n- High Variance (Overfitting): The model memorizes training noise rather than general patterns. Exhibits very low training error but disproportionately high validation error.\n- Irreducible Error: Noise inherent in the data generation process that cannot be eliminated by any model.\n\nSECTION 3: REGULARIZATION TECHNIQUES\nTo combat overfitting and constrain model complexity, regularization penalties are added to the loss objective:\n- L1 Regularization (Lasso): Adds penalty equal to the sum of absolute values of coefficients (lambda * sum(|w_i|)). Encourages sparsity by driving non-essential feature weights strictly to zero, effectively performing automatic feature selection.\n- L2 Regularization (Ridge): Adds penalty equal to the sum of squared coefficients (lambda * sum(w_i^2)). Shrinks weights toward zero smoothly without setting them strictly to zero, effectively handling multicollinearity.\n- ElasticNet: Combines both L1 and L2 penalties with a mixing ratio parameter.\n\nSECTION 4: CLASSIFICATION METRICS BEYOND ACCURACY\nAccuracy alone is misleading on imbalanced datasets (e.g., disease diagnosis where 99% of samples are healthy):\n- Precision: True Positives / (True Positives + False Positives). Answers: Of all instances predicted positive, what proportion was actually positive? Crucial when false alarms are costly.\n- Recall (Sensitivity): True Positives / (True Positives + False Negatives). Answers: Of all actual positive cases, what fraction was correctly captured? Crucial in medical screening and fraud detection.\n- F1-Score: Harmonic mean of Precision and Recall: 2 * (Precision * Recall) / (Precision + Recall).\n- ROC-AUC: Receiver Operating Characteristic Area Under Curve measures model discrimination capability across all classification thresholds independent of class balance.",
       "uploaded_at": "2026-10-29T08:01:49.686Z",
-      "status": "ready",
-      "test_count": 0
-    },
-    "doc-1793544739500": {
-      "id": "doc-1793544739500",
-      "user_id": "user-1793544739439",
-      "filename": "Alice Private Cryptography Notes.txt",
-      "filesize": 209,
-      "filetype": "txt",
-      "subject": "Computer Science",
-      "topics": [
-        "Core Concepts",
-        "Theoretical Principles",
-        "Applied Systems"
-      ],
-      "summary": "Public key cryptography relies on asymmetric mathematical key pairs. The RSA algorithm uses the hardness of factoring large prime numbers, while ECC relies on the discrete logarithm problem on elliptic curves.",
-      "character_count": 209,
-      "word_count": 31,
-      "extracted_text": "Public key cryptography relies on asymmetric mathematical key pairs. The RSA algorithm uses the hardness of factoring large prime numbers, while ECC relies on the discrete logarithm problem on elliptic curves.",
-      "uploaded_at": "2026-11-01T14:52:19.500Z",
-      "status": "ready",
-      "test_count": 0
-    },
-    "doc-1793544760871": {
-      "id": "doc-1793544760871",
-      "user_id": "user-1793544760791",
-      "filename": "Alice Private Cryptography Notes.txt",
-      "filesize": 209,
-      "filetype": "txt",
-      "subject": "Computer Science",
-      "topics": [
-        "Core Concepts",
-        "Theoretical Principles",
-        "Applied Systems"
-      ],
-      "summary": "Public key cryptography relies on asymmetric mathematical key pairs. The RSA algorithm uses the hardness of factoring large prime numbers, while ECC relies on the discrete logarithm problem on elliptic curves.",
-      "character_count": 209,
-      "word_count": 31,
-      "extracted_text": "Public key cryptography relies on asymmetric mathematical key pairs. The RSA algorithm uses the hardness of factoring large prime numbers, while ECC relies on the discrete logarithm problem on elliptic curves.",
-      "uploaded_at": "2026-11-01T14:52:40.871Z",
       "status": "ready",
       "test_count": 0
     }
@@ -404,12 +327,5 @@
         ]
       }
     }
-  },
-  "passwords": {
-    "demo-student-001": "692a8a830f512f831722f78dd900be75:57ddc981ce6ad371c46888f34f7307d79f1a614c46ca812db271a5210bedb911a978a7bd0163b642f2e7e856ebc7962084527d968cc282028f022caa4c1ad62e",
-    "user-1793544739439": "48dd3ba44bd935ebf2e75cc59d3b4bcb:367f210d1d431e0ef08f80f150127e02ac14e4ee1dcbc960883ae09dd2feaff96726cd42dabf7fb584d5ddceeda6bf0e5ef1ecf99cbceb36ebd8020b314d965a",
-    "user-1793544739500": "02ad4e41e8360498f485f281e6900761:0ae91dc38563893ad350dfb2483bfa87bb6d6932ef6fa014c25dccb2ef1d0515f3338e44ff80b1522fecf3fa77350e71c879a390fb255bc2d980b000c1f38942",
-    "user-1793544760791": "cdea21c981f6382b79a9b4604d36f204:19a02448c18ae7b38ba8f837dce888e6a8531242657c38a4ac38a227a35ef47271217ca0401f0f0f91c99edf4a7317c3fe3e0038ed22124ef31c7055bfac4eef",
-    "user-1793544760872": "5e82f8880c871fac3a7c7570d0b8bea2:56f7df6a55152031f7547b6df7bf8b10ca29b90c6381b4778c9522a79e060629715aa3683b0d8879066949ec4f01fe09d90e5f33e242b39943073c80e8d3a4bc"
   }
 }

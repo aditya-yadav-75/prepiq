@@ -10,5 +10,11 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://prepiq-upc7.onrender.com
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash
       - key: GEMINI_API_KEY
         sync: false

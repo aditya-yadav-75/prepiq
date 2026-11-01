@@ -18,7 +18,9 @@ interface DatabaseSchema {
   attempts: Record<string, TestAttempt>;
 }
 
-const DATA_DIR = path.resolve(__dirname, '../../data');
+const DATA_DIR = process.env.DATA_DIR 
+  ? path.resolve(process.env.DATA_DIR) 
+  : path.resolve(__dirname, '../../data');
 const DB_FILE = path.resolve(DATA_DIR, 'store.json');
 
 class Database {
@@ -41,18 +43,33 @@ class Database {
 
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
-        this.data = JSON.parse(raw);
-        if (!this.data.passwords) {
-          this.data.passwords = {};
+        try {
+          this.data = JSON.parse(raw);
+        } catch (jsonErr) {
+          console.error('[DB RECOVERY] Corrupt store.json detected. Archiving backup:', jsonErr);
+          fs.renameSync(DB_FILE, `${DB_FILE}.corrupt.${Date.now()}.bak`);
+          this.seedDemoData();
+          return;
         }
-        if (!this.data.passwords['demo-student-001']) {
-          this.data.passwords['demo-student-001'] = hashPassword('password123');
+
+        if (!this.data.users) this.data.users = {};
+        if (!this.data.passwords) this.data.passwords = {};
+        if (!this.data.documents) this.data.documents = {};
+        if (!this.data.tests) this.data.tests = {};
+        if (!this.data.attempts) this.data.attempts = {};
+
+        // Ensure immutable system sample materials exist without overwriting student data
+        this.ensureSystemMaterials();
+
+        // Ensure student account exists if users collection is empty
+        if (Object.keys(this.data.users).length === 0) {
+          this.seedDemoUser();
         }
       } else {
         this.seedDemoData();
       }
     } catch (err) {
-      console.warn('Could not read existing store.json, seeding fresh demo data:', err);
+      console.warn('Could not read existing store.json, initializing fresh store:', err);
       this.seedDemoData();
     }
   }
@@ -62,13 +79,48 @@ class Database {
       if (!fs.existsSync(DATA_DIR)) {
         fs.mkdirSync(DATA_DIR, { recursive: true });
       }
-      fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
+      // Concurrency-safe atomic write pattern: write to unique temp file, then atomic rename
+      const tempFile = path.resolve(DATA_DIR, `.store.${Date.now()}.${Math.random().toString(36).slice(2, 8)}.tmp`);
+      fs.writeFileSync(tempFile, JSON.stringify(this.data, null, 2), 'utf-8');
+      fs.renameSync(tempFile, DB_FILE);
     } catch (err) {
-      console.error('Failed to write database file:', err);
+      console.error('Failed to write database file atomically:', err);
     }
   }
 
-  public seedDemoData() {
+  private ensureSystemMaterials() {
+    for (const sample of SAMPLE_MATERIALS) {
+      if (!this.data.documents[sample.id]) {
+        this.data.documents[sample.id] = {
+          id: sample.id,
+          user_id: 'system',
+          filename: sample.filename,
+          filesize: sample.character_count * 2,
+          filetype: 'txt',
+          subject: sample.subject,
+          topics: sample.topics,
+          summary: sample.summary,
+          character_count: sample.character_count,
+          word_count: sample.word_count,
+          extracted_text: sample.extracted_text,
+          uploaded_at: new Date(Date.now() - 3 * 86400000).toISOString(),
+          status: 'ready',
+          test_count: sample.id === 'doc-os-001' ? 1 : 0
+        };
+      } else {
+        this.data.documents[sample.id].user_id = 'system';
+      }
+    }
+
+    const demoTestId = 'test-demo-os-01';
+    if (!this.data.tests[demoTestId]) {
+      this.seedDemoTest();
+    } else {
+      this.data.tests[demoTestId].user_id = 'system';
+    }
+  }
+
+  private seedDemoUser() {
     const demoUser: UserProfile = {
       id: 'demo-student-001',
       name: 'Computer Science Student',
@@ -79,34 +131,136 @@ class Database {
       created_at: new Date(Date.now() - 14 * 86400000).toISOString(),
       avatar_color: '#1649E8'
     };
+    this.data.users[demoUser.id] = demoUser;
+    if (!this.data.passwords) this.data.passwords = {};
+    this.data.passwords[demoUser.id] = hashPassword('password123');
+  }
 
-    this.data.users = {
-      [demoUser.id]: demoUser
+  private seedDemoTest() {
+    const demoTestId = 'test-demo-os-01';
+    const demoTest: PracticeTest = {
+      test_id: demoTestId,
+      user_id: 'system',
+      document_id: 'doc-os-001',
+      document_name: 'Operating_Systems_Virtual_Memory_and_Paging.txt',
+      test_title: 'Virtual Memory & Paging Mastery Test',
+      subject: 'Computer Science',
+      topic: 'Virtual Memory & Paging Systems',
+      difficulty: 'medium',
+      question_types: ['mcq', 'true_false', 'short_answer'],
+      total_questions: 6,
+      prompt_version: 'v3',
+      include_explanations: true,
+      include_difficulty_labels: true,
+      timed_mode: true,
+      time_limit_minutes: 15,
+      created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+      validation_summary: {
+        total_generated: 6,
+        total_validated: 6,
+        grounding_score: 98,
+        duplicate_filtered_count: 1,
+        issues_detected: [],
+        is_valid: true
+      },
+      questions: [
+        {
+          question_id: 'q1',
+          question_text: 'Which hardware structure is primarily responsible for caching virtual-to-physical address translations in modern operating systems?',
+          question_type: 'mcq',
+          topic: 'Paging & Address Translation',
+          difficulty: 'medium',
+          options: [
+            'Translation Lookaside Buffer (TLB)',
+            'Direct Memory Access (DMA) Controller',
+            'Arithmetic Logic Unit (ALU)',
+            'Instruction Pointer Register'
+          ],
+          correct_answer: 'Translation Lookaside Buffer (TLB)',
+          explanation: 'The TLB is a high-speed associative hardware cache specifically designed to store recent virtual-to-physical page mappings to avoid full page-table memory lookups.',
+          source_reference: 'Section 3: Translation Lookaside Buffer (TLB)',
+          validation_status: 'verified'
+        },
+        {
+          question_id: 'q2',
+          question_text: 'In paging systems, physical memory is partitioned into fixed-sized blocks known as pages, while logical memory is partitioned into frames.',
+          question_type: 'true_false',
+          topic: 'Paging Architecture',
+          difficulty: 'easy',
+          options: ['True', 'False'],
+          correct_answer: 'False',
+          explanation: 'Physical memory is divided into fixed-sized blocks called frames, whereas logical address space is divided into blocks of the same size called pages.',
+          source_reference: 'Section 2: Paging Architecture and Address Translation',
+          validation_status: 'verified'
+        },
+        {
+          question_id: 'q3',
+          question_text: 'Which page replacement algorithm suffers from Belady’s Anomaly, where allocating more physical memory frames can increase the number of page faults?',
+          question_type: 'mcq',
+          topic: 'Page Replacement Algorithms',
+          difficulty: 'medium',
+          options: [
+            'First-In, First-Out (FIFO)',
+            'Least Recently Used (LRU)',
+            'Optimal Replacement (OPT)',
+            'Clock Algorithm with reference bit'
+          ],
+          correct_answer: 'First-In, First-Out (FIFO)',
+          explanation: 'FIFO is prone to Belady’s Anomaly because it replaces the oldest page regardless of locality. Stack-based algorithms like LRU are mathematically immune.',
+          source_reference: 'Section 5: Page Replacement Algorithms',
+          validation_status: 'verified'
+        },
+        {
+          question_id: 'q4',
+          question_text: 'What sequence of events occurs in the operating system kernel when a referenced virtual page is marked invalid in the process page table?',
+          question_type: 'short_answer',
+          topic: 'Page Fault Handling',
+          difficulty: 'hard',
+          correct_answer: 'A hardware trap causes a page fault, the OS validates the reference, locates an empty physical frame, schedules disk I/O from backing store, updates the page table to valid, and restarts the faulting instruction.',
+          explanation: 'Page fault handling requires trap vector execution, backing swap lookup, disk I/O scheduling, frame mapping, and instruction restart.',
+          source_reference: 'Section 4: Page Fault Handling Workflow',
+          validation_status: 'rubric_evaluated',
+          rubric_criteria: [
+            'Mentions CPU hardware trap / page fault exception',
+            'Identifies disk I/O transfer from swap/backing store to physical frame',
+            'Specifies page table update and instruction restart'
+          ]
+        },
+        {
+          question_id: 'q5',
+          question_text: 'The Effective Access Time (EAT) for memory access decreases as the TLB hit ratio increases.',
+          question_type: 'true_false',
+          topic: 'TLB Performance',
+          difficulty: 'easy',
+          options: ['True', 'False'],
+          correct_answer: 'True',
+          explanation: 'Higher TLB hit ratios eliminate additional RAM accesses required for page table traversal, decreasing effective access latency.',
+          source_reference: 'Section 3: Translation Lookaside Buffer (TLB)',
+          validation_status: 'verified'
+        },
+        {
+          question_id: 'q6',
+          question_text: 'Why does the Least Recently Used (LRU) algorithm belong to the class of stack algorithms, and what property does this guarantee?',
+          question_type: 'short_answer',
+          topic: 'Page Replacement Algorithms',
+          difficulty: 'hard',
+          correct_answer: 'The set of pages in memory for n frames is always a subset of the pages for n+1 frames, which mathematically guarantees immunity from Belady’s Anomaly.',
+          explanation: 'Stack algorithms guarantee that adding frames can never increase page faults.',
+          source_reference: 'Section 5: Page Replacement Algorithms',
+          validation_status: 'rubric_evaluated',
+          rubric_criteria: [
+            'Identifies subset inclusion property for n vs n+1 frames',
+            'States immunity from Belady’s Anomaly'
+          ]
+        }
+      ]
     };
-    this.data.passwords = {
-      [demoUser.id]: hashPassword('password123')
-    };
+    this.data.tests[demoTestId] = demoTest;
+  }
 
-    // Pre-populate sample materials with system ownership
-    this.data.documents = {};
-    for (const sample of SAMPLE_MATERIALS) {
-      this.data.documents[sample.id] = {
-        id: sample.id,
-        user_id: 'system',
-        filename: sample.filename,
-        filesize: sample.character_count * 2,
-        filetype: 'txt',
-        subject: sample.subject,
-        topics: sample.topics,
-        summary: sample.summary,
-        character_count: sample.character_count,
-        word_count: sample.word_count,
-        extracted_text: sample.extracted_text,
-        uploaded_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-        status: 'ready',
-        test_count: sample.id === 'doc-os-001' ? 1 : 0
-      };
-    }
+  public seedDemoData() {
+    this.seedDemoUser();
+    this.ensureSystemMaterials();
 
     // Pre-populate an initial demonstration test generated from OS notes with system ownership
     const demoTestId = 'test-demo-os-01';
@@ -244,7 +398,7 @@ class Database {
     const demoAttempt: TestAttempt = {
       attempt_id: demoAttemptId,
       test_id: demoTestId,
-      user_id: demoUser.id,
+      user_id: 'demo-student-001',
       started_at: new Date(Date.now() - 86400000).toISOString(),
       submitted_at: new Date(Date.now() - 86400000 + 420000).toISOString(),
       time_taken_seconds: 420,

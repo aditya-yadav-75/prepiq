@@ -1,9 +1,11 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { GeminiService } from '../services/gemini.js';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const systemRouter = Router();
 
-systemRouter.get('/status', (req, res) => {
+// GET /api/system/status - Protected operational status endpoint
+systemRouter.get('/status', requireAuth, (req: AuthenticatedRequest, res: Response) => {
   const clientKey = req.headers['x-gemini-key'] as string | undefined;
   const isKeyConfigured = GeminiService.isKeyAvailable(clientKey);
 
@@ -18,18 +20,25 @@ systemRouter.get('/status', (req, res) => {
       fallback_available: true
     },
     storage: {
-      mode: process.env.SUPABASE_URL ? 'supabase_postgres' : 'persistent_store_json',
+      mode: 'persistent_atomic_json',
       connected: true
     }
   });
 });
 
-systemRouter.post('/test-gemini', async (req, res) => {
+// POST /api/system/test-gemini - Validate personal API key connection safely
+systemRouter.post('/test-gemini', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   const { apiKey } = req.body;
-  if (!apiKey) {
-    return res.status(400).json({ success: false, message: 'API key is required' });
+  if (!apiKey || typeof apiKey !== 'string') {
+    return res.status(400).json({ success: false, message: 'Valid API key is required' });
   }
 
-  const result = await GeminiService.testConnection(apiKey);
-  res.json(result);
+  // Sanitize key before passing to test connection
+  const trimmed = apiKey.trim();
+  const result = await GeminiService.testConnection(trimmed);
+  res.json({
+    success: result.success,
+    model: result.model,
+    message: result.message
+  });
 });

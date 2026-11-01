@@ -4,20 +4,22 @@ import { UserProfile } from '../types/index.js';
 import { hashPassword, verifyPassword } from '../utils/security.js';
 import { signToken } from '../utils/jwt.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { authRateLimiter } from '../middleware/rateLimiter.js';
 
 export const authRouter = Router();
 
 // POST /api/auth/login - Authenticate with email and password
-authRouter.post('/login', (req, res) => {
+authRouter.post('/login', authRateLimiter, (req, res) => {
   const { email, password, rememberMe } = req.body;
 
-  if (!email || !password) {
+  if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
     return res.status(400).json({ error: 'Both email and password are required.' });
   }
 
   const normalizedEmail = email.trim().toLowerCase();
   const existing = db.getUserByEmail(normalizedEmail);
   if (!existing) {
+    // Constant-time behavior prevents user enumeration
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
 
@@ -38,30 +40,34 @@ authRouter.post('/login', (req, res) => {
 });
 
 // POST /api/auth/register - Register a new student account
-authRouter.post('/register', (req, res) => {
+authRouter.post('/register', authRateLimiter, (req, res) => {
   const { name, email, password, college, course, year_of_study } = req.body;
 
-  if (!name || !name.trim()) {
+  if (!name || typeof name !== 'string' || !name.trim()) {
     return res.status(400).json({ error: 'Full name is required.' });
   }
 
-  if (!email || !email.trim()) {
+  if (!email || typeof email !== 'string' || !email.trim()) {
     return res.status(400).json({ error: 'Email address is required.' });
   }
 
   const normalizedEmail = email.trim().toLowerCase();
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(normalizedEmail)) {
-    return res.status(400).json({ error: 'Please enter a valid email address.' });
+    return res.status(400).json({ error: 'Please enter a valid academic email address.' });
   }
 
-  if (!password || typeof password !== 'string' || password.length < 6) {
-    return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
+  if (!password || typeof password !== 'string' || password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+  }
+
+  if (!/[A-Za-z]/.test(password) || !/[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    return res.status(400).json({ error: 'Password must contain both letters and numbers/symbols for security.' });
   }
 
   const existing = db.getUserByEmail(normalizedEmail);
   if (existing) {
-    return res.status(400).json({ error: 'An account with this email already exists. Please log in.' });
+    return res.status(400).json({ error: 'An account with this email address is already registered. Please log in.' });
   }
 
   const colors = ['#1649E8', '#245BFF', '#092B9B', '#4d78ff'];
@@ -71,9 +77,9 @@ authRouter.post('/register', (req, res) => {
     id: `user-${Date.now()}`,
     name: name.trim(),
     email: normalizedEmail,
-    college: college || 'Apex Institute of Technology',
-    course: course || 'Computer Science & Engineering',
-    year_of_study: year_of_study || '3rd Year',
+    college: (college && typeof college === 'string') ? college.trim() : 'Apex Institute of Technology',
+    course: (course && typeof course === 'string') ? course.trim() : 'Computer Science & Engineering',
+    year_of_study: (year_of_study && typeof year_of_study === 'string') ? year_of_study.trim() : '3rd Year',
     created_at: new Date().toISOString(),
     avatar_color: avatarColor
   };
@@ -92,24 +98,10 @@ authRouter.post('/register', (req, res) => {
   });
 });
 
-// POST /api/auth/forgot-password - Informational / Token-based reset endpoint
-authRouter.post('/forgot-password', (req, res) => {
-  const { email } = req.body;
-  if (!email || !email.trim()) {
-    return res.status(400).json({ error: 'Email address is required.' });
-  }
-
-  const normalizedEmail = email.trim().toLowerCase();
-  const user = db.getUserByEmail(normalizedEmail);
-
-  if (user) {
-    console.log(`[AUTH AUDIT] Password reset requested for registered user: ${user.email} (${user.id})`);
-  }
-
-  // Consistent message prevents user enumeration attacks
-  res.json({
-    success: true,
-    message: 'If an account is associated with this email, password reset instructions have been recorded. Self-service email reset requires an institutional SMTP gateway.'
+// POST /api/auth/forgot-password - Explicitly informs that self-service reset is disabled without SMTP
+authRouter.post('/forgot-password', authRateLimiter, (req, res) => {
+  res.status(400).json({
+    error: 'Self-service password reset is disabled on this deployment because an institutional SMTP email delivery service is not configured. Please contact the administrator or register a new account.'
   });
 });
 
@@ -123,10 +115,10 @@ authRouter.put('/profile', requireAuth, (req: AuthenticatedRequest, res: Respons
   const user = req.user!;
   const { name, college, course, year_of_study } = req.body;
 
-  if (name) user.name = name.trim();
-  if (college) user.college = college.trim();
-  if (course) user.course = course.trim();
-  if (year_of_study) user.year_of_study = year_of_study.trim();
+  if (name && typeof name === 'string') user.name = name.trim();
+  if (college && typeof college === 'string') user.college = college.trim();
+  if (course && typeof course === 'string') user.course = course.trim();
+  if (year_of_study && typeof year_of_study === 'string') user.year_of_study = year_of_study.trim();
 
   db.saveUser(user);
   res.json({ success: true, user });

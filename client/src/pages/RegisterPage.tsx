@@ -33,8 +33,12 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
       setError('Please provide a valid email address.');
       return;
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
+    if (!/[A-Za-z]/.test(password) || !/[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      setError('Password must contain both letters and numbers/symbols.');
       return;
     }
     if (password !== confirmPassword) {

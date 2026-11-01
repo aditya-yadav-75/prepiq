@@ -6,11 +6,12 @@ import { AnswerValidator } from '../services/answerValidator.js';
 import { PROMPT_METADATA, PromptConfig } from '../services/prompts.js';
 import { PracticeTest, PromptComparisonResult } from '../types/index.js';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
+import { generationRateLimiter } from '../middleware/rateLimiter.js';
 
 export const generateRouter = Router();
 
 // POST generate practice exam
-generateRouter.post('/test', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+generateRouter.post('/test', requireAuth, generationRateLimiter, async (req: AuthenticatedRequest, res: Response) => {
   const startTime = Date.now();
   try {
     const userId = req.userId!;
@@ -36,11 +37,12 @@ generateRouter.post('/test', requireAuth, async (req: AuthenticatedRequest, res:
     let docName = 'Direct Study Notes';
 
     if (document_id) {
-      const doc = db.getDocument(document_id);
+      const docId = Array.isArray(document_id) ? document_id[0] : document_id;
+      const doc = db.getDocument(docId);
       if (!doc) {
         return res.status(404).json({ error: 'Selected study document was not found.' });
       }
-      // Ensure document belongs to user or is a system sample document
+      // Ensure document belongs to user or is an immutable system sample document
       if (doc.user_id !== userId && doc.user_id !== 'system') {
         return res.status(403).json({ error: 'Access denied: You do not have permission to generate an exam from this document.' });
       }
@@ -145,17 +147,24 @@ generateRouter.post('/test', requireAuth, async (req: AuthenticatedRequest, res:
   }
 });
 
-// POST compare prompts V1, V2, V3
-generateRouter.post('/compare-prompts', async (req, res) => {
+// POST compare prompts V1, V2, V3 - Protected against unauthorized resource drain
+generateRouter.post('/compare-prompts', requireAuth, generationRateLimiter, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { document_id, raw_text } = req.body;
 
     let sourceText = '';
     if (document_id) {
-      const doc = db.getDocument(document_id);
-      if (doc) sourceText = doc.extracted_text;
-    } else if (raw_text) {
-      sourceText = raw_text;
+      const docId = Array.isArray(document_id) ? document_id[0] : document_id;
+      const doc = db.getDocument(docId);
+      if (!doc) {
+        return res.status(404).json({ error: 'Selected study document was not found.' });
+      }
+      if (doc.user_id !== req.userId && doc.user_id !== 'system') {
+        return res.status(403).json({ error: 'Access denied: You do not have permission to view this document.' });
+      }
+      sourceText = doc.extracted_text;
+    } else if (raw_text && typeof raw_text === 'string') {
+      sourceText = raw_text.trim();
     }
 
     if (!sourceText || sourceText.length < 50) {

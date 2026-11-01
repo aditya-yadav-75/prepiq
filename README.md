@@ -7,8 +7,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](#)
 [![React](https://img.shields.io/badge/React-18.3-61dafb)](#)
 [![Node.js](https://img.shields.io/badge/Node.js-v24-green)](#)
-[![Auth](https://img.shields.io/badge/Auth-JWT%20HS256%20%2B%20scrypt-1649E8)](#)
-[![AI Engine](https://img.shields.io/badge/AI-Google%20Gemini-1649E8)](#)
+[![Security Audit](https://img.shields.io/badge/Security%20Audit-15%2F15%20Passed-A6FF00?labelColor=092B9B)](#)
 [![Validation Suite](https://img.shields.io/badge/Validation%20Suite-6%2F6%20Passed-A6FF00?labelColor=092B9B)](#)
 
 ---
@@ -29,7 +28,7 @@ University and professional certification students spend hours reviewing dense t
 
 ## 2. Key Features
 
-- **Multi-Format Document Upload**: Ingests PDF, Microsoft Word DOCX, and plain text notes with character threshold validation and automatic topic extraction.
+- **Multi-Format Document Ingestion**: Ingests PDF, Microsoft Word DOCX, and plain text notes with character threshold validation (`MIN_CHARS = 100`) and automatic topic extraction.
 - **Configurable Practice Examinations**: Customize question count (5–30), cognitive difficulty (Easy, Medium, Hard, Mixed), and formats (MCQs, True/False, Short Answer, Fill-in-the-blanks, Descriptive).
 - **Three Tested Prompt Versions (V1, V2, V3)**:
   - *Version 1 (Baseline)*: Rapid factual recall.
@@ -58,10 +57,10 @@ University and professional certification students spend hours reviewing dense t
 ### Backend Server
 - **Runtime**: Node.js v24
 - **Framework**: Express.js with TypeScript
-- **Security & Cryptography**: Signed HMAC-SHA256 JWT tokens, `crypto.scrypt` password hashing, timing-safe equality verification, security headers (`nosniff`, `DENY`, `strict-origin`)
+- **Security & Cryptography**: Signed HMAC-SHA256 JWT tokens, `crypto.scrypt` password hashing, timing-safe equality verification, rate limiting, and security headers (`nosniff`, `DENY`, `strict-origin`)
 - **Document Processing**: `pdf-parse` (PDF extraction), `mammoth` (DOCX extraction), UTF-8 text sanitization
 - **AI Integration**: `@google/generative-ai` (Google Gemini 1.5 Flash) with fallback to internal semantic generation engine
-- **Persistence**: Atomic local JSON database with immutable `'system'` materials and clean PostgreSQL / Supabase adapter interface
+- **Persistence**: Concurrency-safe atomic file storage (`store.json`) with configurable `DATA_DIR` and immutable `'system'` curriculum resources
 
 ---
 
@@ -72,19 +71,27 @@ PrepIQ implements enterprise-grade academic authorization and session security:
 1. **Server-Validated JWT Bearer Tokens (`HS256`)**:
    - Authentication tokens are cryptographically signed using HMAC-SHA256 (`crypto.createHmac`) and validated on every protected request.
    - Client requests provide credentials via standard `Authorization: Bearer <token>` headers. Frontend-trusted headers (`x-user-id`) are completely disabled and rejected.
+   - The server validates the algorithm (`alg === 'HS256'`), token expiration (`exp > now`), and issue timestamp (`iat`).
+   - Server fails safely at boot if `JWT_SECRET` is missing, empty, or shorter than 32 characters.
 2. **Cryptographic Password Hashing (`scrypt`)**:
    - User passwords are encrypted with Node.js built-in `crypto.scrypt` using unique 16-byte cryptographic salts.
    - Verification utilizes `crypto.timingSafeEqual` to eliminate timing side-channel attacks.
-3. **Strict Resource Ownership & Isolation**:
-   - All protected routes (`/api/documents`, `/api/tests`, `/api/generate/test`, `/api/analytics`) enforce ownership verification via `requireAuth` middleware.
+   - Passwords require a minimum of 8 characters, containing both letters and numbers/symbols on both frontend and backend.
+3. **Strict Resource Ownership & Isolation (IDOR Prevention)**:
+   - All protected routes (`/api/documents`, `/api/tests`, `/api/generate/test`, `/api/generate/compare-prompts`, `/api/test-suite`, `/api/analytics`, `/api/system`) enforce ownership verification via `requireAuth` middleware.
    - Cross-user data snooping, tampering, or deletion returns `HTTP 403 Forbidden`.
    - Sample curriculum notes (Operating Systems, Machine Learning, Computer Systems) are marked with `user_id: 'system'`, making them accessible to all enrolled students while remaining immutable against unauthorized deletion.
-4. **Session Persistence Control**:
+4. **Rate Limiting**:
+   - Authentication endpoints (`/api/auth/login`, `/api/auth/register`) are rate-limited to 25 requests per 15-minute window per IP.
+   - AI generation endpoints (`/api/generate/test`, `/api/generate/compare-prompts`) are rate-limited to 35 jobs per 10-minute window per IP.
+5. **Session Persistence Control**:
    - Selecting **"Remember this device"** stores the signed JWT in `localStorage` for 30-day persistence.
    - Deselecting it stores the token strictly in `sessionStorage` (cleared immediately when the browser tab closes).
-5. **Security Headers & Defense-in-Depth**:
+   - On logout, all tokens and session storage entries are completely purged.
+6. **Security Headers & Defense-in-Depth**:
    - Enforces `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`, and `Referrer-Policy: strict-origin-when-cross-origin`.
    - File uploads are validated via Multer with strict MIME checking, 15MB file size limits, and filename sanitization against path traversal attacks.
+   - Restricted CORS allowlist configurable via `CORS_ORIGIN` with same-origin production serving support.
 
 ---
 
@@ -105,10 +112,10 @@ prepiq/
 │   └── tailwind.config.js      # Brand Palette & Glass Utilities
 ├── server/                     # Express Backend
 │   ├── src/
-│   │   ├── middleware/         # requireAuth, AuthenticatedRequest
+│   │   ├── middleware/         # requireAuth, rateLimiter
 │   │   ├── utils/              # jwt.ts (sign/verify), security.ts (scrypt)
-│   │   ├── routes/             # auth, documents, generate, tests, analytics, testSuite
-│   │   ├── services/           # gemini, prompts, extractor, validator, evaluator
+│   │   ├── routes/             # auth, documents, generate, tests, analytics, testSuite, system
+│   │   ├── services/           # gemini, prompts, extractor, validator, evaluator, testSuiteRunner
 │   │   ├── data/               # database.ts, sampleMaterials.ts, store.json
 │   │   └── types/              # Backend Schemas
 │   └── uploads/                # Sanitized temporary file staging
@@ -169,83 +176,71 @@ The application includes an internal test suite verifying 6 scenarios:
 
 ---
 
-## 9. Setup & Local Execution Instructions
+## 9. Persistence Model & Cloud Deployment Guide
+
+### Data Persistence Architecture
+PrepIQ stores application data using a concurrency-safe atomic write pattern:
+- Writes are serialized to unique temporary files and committed using atomic POSIX rename (`fs.renameSync`), eliminating risk of half-written file corruption.
+- System curriculum materials (`doc-os-001`, `doc-ml-002`, `doc-cs-003`) are seeded automatically under immutable `'system'` ownership if missing, without overwriting student accounts.
+- Data directory is configurable via the `DATA_DIR` environment variable (defaults to `server/data`).
+
+### Deploying to Render with Persistent Disk
+1. **Ephemeral vs. Persistent Disks**:
+   - On the Render Free plan, container filesystems are **ephemeral** and reset across container restarts or new deploys.
+   - To persist data permanently on Render, attach a **Render Persistent Disk** mounted at `/app/server/data` (available on Render Starter plans and above) and set `DATA_DIR=/app/server/data`.
+2. **Required Render Environment Variables**:
+   - `NODE_ENV`: `production`
+   - `PORT`: `10000`
+   - `JWT_SECRET`: Random 64-character secret (or generated via `generateValue: true` in `render.yaml`)
+   - `CORS_ORIGIN`: `https://prepiq-upc7.onrender.com`
+   - `GEMINI_API_KEY`: *(Optional)* Your Google AI Gemini API Key.
+   - `GEMINI_MODEL`: `gemini-1.5-flash`
+   - `DATA_DIR`: *(Optional)* Mount path of persistent disk, e.g. `/app/server/data`.
+
+---
+
+## 10. Local Setup & Execution Instructions
 
 ### Prerequisites
 - Node.js v18+ (tested on Node.js v24)
 - npm v9+
 
-### Environment Configuration (Optional)
-Create `server/.env`:
-```env
-PORT=5001
-JWT_SECRET=your_long_random_hmac_secret_key_2026
-GEMINI_API_KEY=your_gemini_api_key_here  # Optional: also configurable in Settings UI
-GEMINI_MODEL=gemini-1.5-flash
-```
-*Note: If no Gemini API key is supplied, PrepIQ automatically runs in high-fidelity local semantic mode, allowing complete demonstration without external dependencies.*
-
-### Quick Start
+### Environment Configuration
 ```bash
-# 1. Clone repository and navigate to root
-git clone https://github.com/aditya-yadav-75/prepiq.git
-cd prepiq
+cp server/.env.example server/.env
+# Edit server/.env to set your JWT_SECRET (min 32 chars) and optional GEMINI_API_KEY
+```
 
-# 2. Install dependencies across client and server
+### Installation & Execution
+```bash
+# 1. Install dependencies across client and server
 npm run install:all
 
-# 3. Run both server and client concurrently
+# 2. Run both server and client concurrently in development
 npm run dev
+
+# 3. Or compile and run unified production build
+npm run build
+npm start
 ```
 
 - **Frontend Client**: `http://localhost:3000`
 - **Backend API**: `http://localhost:5001`
 - **Health Check**: `http://localhost:5001/api/health`
 
----
+### Automated Security & Validation Test Execution
+```bash
+# Run the 15-point Security and Authorization Test Harness
+cd server && npx tsx src/comprehensive_audit_test.ts
 
-## 10. Demonstration Guide (3–5 Minute Walkthrough)
-
-1. **Step 1: Sign In or Register**
-   - Click **Login** or **Launch App** from the floating Liquid Glass navbar.
-   - Sign in with pre-seeded student credentials:
-     - **Email**: `student@prepiq.edu`
-     - **Password**: `password123`
-   - Or click **Create your account** to register an independent academic profile.
-2. **Step 2: Generate an Exam**
-   - Click **Generate Practice Test** in the sidebar.
-   - Select the pre-loaded **Operating Systems (Virtual Memory & Paging)** study notes.
-   - Select **Version 3 (Grounded & Rubric-Validated)**, 6 questions, Medium difficulty.
-   - Click **Generate Practice Test** and observe the real-time progress modal.
-3. **Step 3: Interactive Practice Test**
-   - Answer the multiple-choice and short-answer questions.
-   - Observe the live countdown timer, review flags, and interactive question palette.
-   - Click **Submit Test** and confirm on the review dialog.
-4. **Step 4: Automated Evaluation & Validated Answer Key**
-   - Inspect the **Automated Workflow Execution Log** showing real-time execution in milliseconds.
-   - Review the **Validated Answer Key** with exact section citations (`Section 5: Page Replacement Algorithms`) and transparent rubric grading.
-5. **Step 5: Validation Suite & Prompt Lab**
-   - Navigate to **Validation Test Suite** to run the 6 automated test cases live.
-   - Navigate to **Prompt Engineering Lab** to compare Prompt V1, V2, and V3 side-by-side.
+# Run the 6-stage Academic Validation Invariant Suite
+node -e 'const { TestSuiteRunner } = require("./server/dist/services/testSuiteRunner.js"); TestSuiteRunner.runAllTests().then(console.log);'
+```
 
 ---
 
-## 11. Persistence Model & Cloud Deployment Notice
+## 11. Known Limitations & Future Scope
 
-### Data Persistence Architecture
-PrepIQ stores application data atomically in `server/data/store.json`. The persistence engine implements safe serialization with:
-- System curriculum materials seeded under immutable `'system'` ownership.
-- Student accounts, hashed passwords, private study materials, practice tests, and test attempts committed atomically.
-
-### Cloud Hosting Notice (Render / Containerized Platforms)
-- On free-tier cloud platforms (such as Render Free Web Services), container filesystems are **ephemeral** and reset across container restarts or new deployments.
-- For a persistent multi-instance production environment, attach a managed database by setting `DATABASE_URL` (PostgreSQL / Supabase / Neon) or attaching a Render Persistent Disk mounted at `/app/server/data`.
-- A complete migration interface is provided in `server/src/data/database.ts` ready to connect directly to PostgreSQL via Prisma, Drizzle, or `pg`.
-
----
-
-## 12. Limitations & Future Scope
-
-- **OCR for Hand-Drawn Diagrams**: Current extraction focuses on textual characters and tables; future work will incorporate Gemini Vision OCR for handwritten equations and diagrams.
-- **Adaptive Spaced Repetition**: Integrating Leitner flashcard queues based on identified weak topics.
+- **OCR for Hand-Drawn Diagrams**: Current extraction focuses on text, headings, and tables; future work will incorporate Gemini Vision OCR for handwritten equations and diagrams.
+- **SMTP Email Relay**: Self-service automated password reset is currently disabled because an institutional SMTP email delivery service is not configured on this environment.
 - **LMS Canvas / Moodle Integration**: Direct export of generated validated exams into QTI / SCORM formats.
