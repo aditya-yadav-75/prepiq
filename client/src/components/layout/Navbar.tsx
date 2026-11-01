@@ -25,11 +25,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage }) => {
         className="
           flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3
           rounded-full
-          bg-white/70 dark:bg-slate-900/75
-          backdrop-blur-2xl backdrop-saturate-150
-          border border-white/80 dark:border-white/10
-          shadow-[0_8px_32px_0_rgba(0,0,0,0.08),inset_0_1px_1px_0_rgba(255,255,255,0.8)]
-          dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.1)]
+          liquid-glass-floating-pill
+          transition-all
         "
         aria-label="Public Navigation"
       >
@@ -59,8 +56,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage }) => {
             className={`
               px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-bold rounded-full transition-all
               ${currentPage === 'login'
-                ? 'bg-slate-100 dark:bg-slate-800 text-cobalt dark:text-neon-lime shadow-xs'
-                : 'text-slate-700 dark:text-slate-200 hover:text-cobalt dark:hover:text-neon-lime hover:bg-slate-100/70 dark:hover:bg-slate-800/60'}
+                ? 'bg-white/40 dark:bg-white/10 text-cobalt dark:text-neon-lime shadow-xs border border-white/40 dark:border-white/10'
+                : 'text-darkText dark:text-slate-200 hover:text-cobalt dark:hover:text-neon-lime hover:bg-white/30 dark:hover:bg-white/5'}
             `}
           >
             Login
