@@ -28,24 +28,19 @@ interface NavigationState {
 }
 
 const getInitialNav = (): NavigationState => {
-  // If user session is already present in localStorage, restore active workspace view directly
-  const storedUser = localStorage.getItem('prepiq_user');
-  if (storedUser) {
-    try {
-      const parsed = JSON.parse(storedUser);
-      if (parsed && parsed.id) {
-        const savedPage = sessionStorage.getItem('prepiq_active_page');
-        const validPages = [
-          'dashboard', 'upload', 'generate', 'test', 'results',
-          'tests', 'materials', 'analytics', 'prompts',
-          'test-suite', 'workflow', 'settings'
-        ];
-        if (savedPage && validPages.includes(savedPage)) {
-          return { page: savedPage };
-        }
-        return { page: 'dashboard' };
-      }
-    } catch (_) {}
+  // Check for verified JWT token in localStorage (rememberMe) or sessionStorage
+  const token = localStorage.getItem('prepiq_token') || sessionStorage.getItem('prepiq_token');
+  if (token) {
+    const savedPage = sessionStorage.getItem('prepiq_active_page');
+    const validPages = [
+      'dashboard', 'upload', 'generate', 'test', 'results',
+      'tests', 'materials', 'analytics', 'prompts',
+      'test-suite', 'workflow', 'settings'
+    ];
+    if (savedPage && validPages.includes(savedPage)) {
+      return { page: savedPage };
+    }
+    return { page: 'dashboard' };
   }
   return { page: 'landing' };
 };

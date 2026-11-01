@@ -71,7 +71,7 @@ class Database {
   public seedDemoData() {
     const demoUser: UserProfile = {
       id: 'demo-student-001',
-      name: 'Aditya Yadav',
+      name: 'Computer Science Student',
       email: 'student@prepiq.edu',
       college: 'Apex Institute of Technology',
       course: 'Computer Science & AI',
@@ -87,12 +87,12 @@ class Database {
       [demoUser.id]: hashPassword('password123')
     };
 
-    // Pre-populate sample materials
+    // Pre-populate sample materials with system ownership
     this.data.documents = {};
     for (const sample of SAMPLE_MATERIALS) {
       this.data.documents[sample.id] = {
         id: sample.id,
-        user_id: demoUser.id,
+        user_id: 'system',
         filename: sample.filename,
         filesize: sample.character_count * 2,
         filetype: 'txt',
@@ -108,11 +108,11 @@ class Database {
       };
     }
 
-    // Pre-populate an initial demonstration test generated from OS notes
+    // Pre-populate an initial demonstration test generated from OS notes with system ownership
     const demoTestId = 'test-demo-os-01';
     const demoTest: PracticeTest = {
       test_id: demoTestId,
-      user_id: demoUser.id,
+      user_id: 'system',
       document_id: 'doc-os-001',
       document_name: 'Operating_Systems_Virtual_Memory_and_Paging.txt',
       test_title: 'Virtual Memory & Paging Mastery Test',
@@ -362,7 +362,7 @@ class Database {
   // Document operations
   public getDocuments(userId: string): StudyDocument[] {
     return Object.values(this.data.documents)
-      .filter(d => d.user_id === userId)
+      .filter(d => d.user_id === userId || d.user_id === 'system')
       .sort((a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime());
   }
 
@@ -377,7 +377,7 @@ class Database {
 
   public deleteDocument(docId: string, userId: string): boolean {
     const doc = this.data.documents[docId];
-    if (doc && doc.user_id === userId) {
+    if (doc && doc.user_id === userId && doc.user_id !== 'system') {
       delete this.data.documents[docId];
       this.persist();
       return true;
@@ -388,7 +388,7 @@ class Database {
   // Test operations
   public getTests(userId: string): PracticeTest[] {
     return Object.values(this.data.tests)
-      .filter(t => t.user_id === userId)
+      .filter(t => t.user_id === userId || t.user_id === 'system')
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }
 
@@ -406,7 +406,7 @@ class Database {
 
   public deleteTest(testId: string, userId: string): boolean {
     const test = this.data.tests[testId];
-    if (test && test.user_id === userId) {
+    if (test && test.user_id === userId && test.user_id !== 'system') {
       delete this.data.tests[testId];
       // Also clean up attempts for this test
       for (const [attId, att] of Object.entries(this.data.attempts)) {

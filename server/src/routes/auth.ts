@@ -1,51 +1,43 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { db } from '../data/database.js';
 import { UserProfile } from '../types/index.js';
 import { hashPassword, verifyPassword } from '../utils/security.js';
+import { signToken } from '../utils/jwt.js';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const authRouter = Router();
 
-// Login
+// POST /api/auth/login - Authenticate with email and password
 authRouter.post('/login', (req, res) => {
-  const { email, password, isDemo } = req.body;
-
-  // 1-Click Demo Student Sign-In
-  if (isDemo) {
-    const demoUser = db.getUser('demo-student-001');
-    if (demoUser) {
-      return res.json({ success: true, user: demoUser });
-    }
-  }
+  const { email, password, rememberMe } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: 'Both email and password are required.' });
   }
 
-  const existing = db.getUserByEmail(email.trim().toLowerCase());
+  const normalizedEmail = email.trim().toLowerCase();
+  const existing = db.getUserByEmail(normalizedEmail);
   if (!existing) {
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
 
   const storedHash = db.getUserPassword(existing.id);
-  if (!storedHash) {
-    // If demo account was accessed by email, seed password hash if missing
-    if (existing.email === 'student@prepiq.edu') {
-      const defaultHash = hashPassword('password123');
-      db.setUserPassword(existing.id, defaultHash);
-      if (!verifyPassword(password, defaultHash)) {
-        return res.status(401).json({ error: 'Invalid email or password.' });
-      }
-    } else {
-      return res.status(401).json({ error: 'Invalid email or password.' });
-    }
-  } else if (!verifyPassword(password, storedHash)) {
+  if (!storedHash || !verifyPassword(password, storedHash)) {
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
 
-  res.json({ success: true, user: existing });
+  // Generate signed JWT token
+  const expiresInSeconds = rememberMe ? 30 * 86400 : 24 * 3600; // 30 days if rememberMe, else 24 hours
+  const token = signToken({ id: existing.id, email: existing.email }, expiresInSeconds);
+
+  res.json({
+    success: true,
+    user: existing,
+    token
+  });
 });
 
-// Register
+// POST /api/auth/register - Register a new student account
 authRouter.post('/register', (req, res) => {
   const { name, email, password, college, course, year_of_study } = req.body;
 
@@ -90,39 +82,52 @@ authRouter.post('/register', (req, res) => {
   db.saveUser(newUser);
   db.setUserPassword(newUser.id, hashedPassword);
 
-  res.status(201).json({ success: true, user: newUser });
+  // Sign initial JWT token
+  const token = signToken({ id: newUser.id, email: newUser.email }, 30 * 86400);
+
+  res.status(201).json({
+    success: true,
+    user: newUser,
+    token
+  });
 });
 
-// Current user profile
-authRouter.get('/me', (req, res) => {
-  const userId = (req.headers['x-user-id'] as string) || 'demo-student-001';
-  const user = db.getUser(userId) || db.getUser('demo-student-001');
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+// POST /api/auth/forgot-password - Informational / Token-based reset endpoint
+authRouter.post('/forgot-password', (req, res) => {
+  const { email } = req.body;
+  if (!email || !email.trim()) {
+    return res.status(400).json({ error: 'Email address is required.' });
   }
-  res.json({ user });
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = db.getUserByEmail(normalizedEmail);
+
+  if (user) {
+    console.log(`[AUTH AUDIT] Password reset requested for registered user: ${user.email} (${user.id})`);
+  }
+
+  // Consistent message prevents user enumeration attacks
+  res.json({
+    success: true,
+    message: 'If an account is associated with this email, password reset instructions have been recorded. Self-service email reset requires an institutional SMTP gateway.'
+  });
 });
 
-// Update profile
-authRouter.put('/profile', (req, res) => {
-  const userId = (req.headers['x-user-id'] as string) || 'demo-student-001';
-  const user = db.getUser(userId);
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
+// GET /api/auth/me - Retrieve current verified profile
+authRouter.get('/me', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  res.json({ user: req.user });
+});
 
+// PUT /api/auth/profile - Update current user profile
+authRouter.put('/profile', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const user = req.user!;
   const { name, college, course, year_of_study } = req.body;
-  if (name) user.name = name;
-  if (college) user.college = college;
-  if (course) user.course = course;
-  if (year_of_study) user.year_of_study = year_of_study;
+
+  if (name) user.name = name.trim();
+  if (college) user.college = college.trim();
+  if (course) user.course = course.trim();
+  if (year_of_study) user.year_of_study = year_of_study.trim();
 
   db.saveUser(user);
   res.json({ success: true, user });
-});
-
-// Reset to demo data
-authRouter.post('/reset-demo', (req, res) => {
-  db.seedDemoData();
-  res.json({ success: true, message: 'Database reset to initial demonstration state.' });
 });

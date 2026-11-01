@@ -1,12 +1,13 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { db } from '../data/database.js';
 import { EvaluationEngine } from '../services/evaluationEngine.js';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const testsRouter = Router();
 
-// GET all tests for user
-testsRouter.get('/', (req, res) => {
-  const userId = (req.headers['x-user-id'] as string) || 'demo-student-001';
+// GET all tests for authenticated user
+testsRouter.get('/', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.userId!;
   const tests = db.getTests(userId);
   const attempts = db.getAttempts(userId);
 
@@ -26,20 +27,34 @@ testsRouter.get('/', (req, res) => {
   res.json({ tests: enhanced });
 });
 
-// GET single test
-testsRouter.get('/:id', (req, res) => {
-  const test = db.getTest(req.params.id);
+// GET single test with ownership check
+testsRouter.get('/:id', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const testId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const test = db.getTest(testId);
   if (!test) {
     return res.status(404).json({ error: 'Practice test not found' });
+  }
+  // Allow viewing if owned by user or system sample test
+  if (test.user_id !== req.userId && test.user_id !== 'system') {
+    return res.status(403).json({ error: 'Access denied: You do not have permission to view this test.' });
   }
   res.json({ test });
 });
 
 // POST submit test (Triggers automated workflow: Evaluation -> Score -> Topics -> Save -> Analytics)
-testsRouter.post('/:id/submit', async (req, res) => {
+testsRouter.post('/:id/submit', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = (req.headers['x-user-id'] as string) || 'demo-student-001';
-    const testId = req.params.id;
+    const userId = req.userId!;
+    const testId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+
+    const test = db.getTest(testId);
+    if (!test) {
+      return res.status(404).json({ error: 'Practice test not found' });
+    }
+    if (test.user_id !== userId && test.user_id !== 'system') {
+      return res.status(403).json({ error: 'Access denied: You do not have permission to submit this test.' });
+    }
+
     const { answers, started_at, time_taken_seconds } = req.body;
 
     const attempt = await EvaluationEngine.evaluateAndRecord({
@@ -60,20 +75,35 @@ testsRouter.post('/:id/submit', async (req, res) => {
   }
 });
 
-// GET specific attempt
-testsRouter.get('/attempts/:attemptId', (req, res) => {
-  const attempt = db.getAttempt(req.params.attemptId);
+// GET specific attempt with ownership check
+testsRouter.get('/attempts/:attemptId', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const attemptId = Array.isArray(req.params.attemptId) ? req.params.attemptId[0] : req.params.attemptId;
+  const attempt = db.getAttempt(attemptId);
   if (!attempt) {
     return res.status(404).json({ error: 'Attempt result not found' });
+  }
+  if (attempt.user_id !== req.userId) {
+    return res.status(403).json({ error: 'Access denied: You do not have permission to view this attempt result.' });
   }
   const test = db.getTest(attempt.test_id);
   res.json({ attempt, test });
 });
 
-// DELETE test
-testsRouter.delete('/:id', (req, res) => {
-  const userId = (req.headers['x-user-id'] as string) || 'demo-student-001';
-  const deleted = db.deleteTest(req.params.id, userId);
+// DELETE test with ownership check
+testsRouter.delete('/:id', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const testId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const test = db.getTest(testId);
+  if (!test) {
+    return res.status(404).json({ error: 'Test not found' });
+  }
+  if (test.user_id === 'system') {
+    return res.status(403).json({ error: 'System sample tests cannot be deleted.' });
+  }
+  if (test.user_id !== req.userId) {
+    return res.status(403).json({ error: 'Access denied: You do not have permission to delete this test.' });
+  }
+
+  const deleted = db.deleteTest(testId, req.userId!);
   if (!deleted) {
     return res.status(404).json({ error: 'Test not found or unauthorized' });
   }

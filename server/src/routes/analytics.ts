@@ -1,10 +1,12 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { db } from '../data/database.js';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const analyticsRouter = Router();
 
-analyticsRouter.get('/', (req, res) => {
-  const userId = (req.headers['x-user-id'] as string) || 'demo-student-001';
+// GET performance analytics for authenticated student
+analyticsRouter.get('/', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.userId!;
   const analytics = db.getAnalytics(userId);
   res.json({ analytics });
 });

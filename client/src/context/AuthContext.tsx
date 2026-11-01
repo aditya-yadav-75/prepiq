@@ -7,7 +7,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   geminiKey: string;
-  login: (email: string, password?: string, isDemo?: boolean) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   register: (data: { name: string; email: string; password?: string; college?: string; course?: string; year_of_study?: string }) => Promise<void>;
   logout: () => void;
   updateUser: (data: Partial<UserProfile>) => Promise<void>;
@@ -22,31 +22,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [geminiKey, setGeminiKey] = useState<string>('');
 
   useEffect(() => {
-    // Check local storage for persisted session
-    const storedUser = localStorage.getItem('prepiq_user');
-    const storedKey = localStorage.getItem('prepiq_gemini_key') || '';
-    setGeminiKey(storedKey);
+    const initializeAuth = async () => {
+      const storedKey = localStorage.getItem('prepiq_gemini_key') || '';
+      setGeminiKey(storedKey);
 
-    if (storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        setUser(parsed);
-      } catch (_) {
-        localStorage.removeItem('prepiq_user');
+      // Inspect persistent (localStorage) or session-based (sessionStorage) JWT token
+      const persistentToken = localStorage.getItem('prepiq_token');
+      const sessionToken = sessionStorage.getItem('prepiq_token');
+      const token = persistentToken || sessionToken;
+
+      if (!token) {
         setUser(null);
+        setIsLoading(false);
+        return;
       }
-    } else {
-      setUser(null);
-    }
-    setIsLoading(false);
+
+      try {
+        // Cryptographically validate session against backend /api/auth/me
+        const verifiedUser = await api.getCurrentUser();
+        setUser(verifiedUser);
+        if (persistentToken) {
+          localStorage.setItem('prepiq_user', JSON.stringify(verifiedUser));
+        } else {
+          sessionStorage.setItem('prepiq_user', JSON.stringify(verifiedUser));
+        }
+      } catch (err) {
+        console.warn('Session verification failed; invalidating stored credentials');
+        localStorage.removeItem('prepiq_token');
+        localStorage.removeItem('prepiq_user');
+        sessionStorage.removeItem('prepiq_token');
+        sessionStorage.removeItem('prepiq_user');
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
-  const login = async (email: string, password?: string, isDemo = false) => {
+  const login = async (email: string, password: string, rememberMe = true) => {
     setIsLoading(true);
     try {
-      const res = await api.login(email, password, isDemo);
+      const res = await api.login(email, password, rememberMe);
       setUser(res.user);
-      localStorage.setItem('prepiq_user', JSON.stringify(res.user));
+
+      if (rememberMe) {
+        localStorage.setItem('prepiq_token', res.token);
+        localStorage.setItem('prepiq_user', JSON.stringify(res.user));
+        sessionStorage.removeItem('prepiq_token');
+        sessionStorage.removeItem('prepiq_user');
+      } else {
+        sessionStorage.setItem('prepiq_token', res.token);
+        sessionStorage.setItem('prepiq_user', JSON.stringify(res.user));
+        localStorage.removeItem('prepiq_token');
+        localStorage.removeItem('prepiq_user');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -57,6 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await api.register(data);
       setUser(res.user);
+      localStorage.setItem('prepiq_token', res.token);
       localStorage.setItem('prepiq_user', JSON.stringify(res.user));
     } finally {
       setIsLoading(false);
@@ -65,7 +97,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('prepiq_token');
     localStorage.removeItem('prepiq_user');
+    sessionStorage.removeItem('prepiq_token');
+    sessionStorage.removeItem('prepiq_user');
     sessionStorage.removeItem('prepiq_active_page');
   };
 
@@ -73,7 +108,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     const updated = await api.updateProfile(data);
     setUser(updated);
-    localStorage.setItem('prepiq_user', JSON.stringify(updated));
+    if (localStorage.getItem('prepiq_token')) {
+      localStorage.setItem('prepiq_user', JSON.stringify(updated));
+    } else {
+      sessionStorage.setItem('prepiq_user', JSON.stringify(updated));
+    }
   };
 
   const saveGeminiKey = (key: string) => {

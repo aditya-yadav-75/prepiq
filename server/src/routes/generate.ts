@@ -1,18 +1,19 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { db } from '../data/database.js';
 import { GeminiService } from '../services/gemini.js';
 import { LocalGenerationEngine } from '../services/localGenerationEngine.js';
 import { AnswerValidator } from '../services/answerValidator.js';
 import { PROMPT_METADATA, PromptConfig } from '../services/prompts.js';
 import { PracticeTest, PromptComparisonResult } from '../types/index.js';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const generateRouter = Router();
 
 // POST generate practice exam
-generateRouter.post('/test', async (req, res) => {
+generateRouter.post('/test', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   const startTime = Date.now();
   try {
-    const userId = (req.headers['x-user-id'] as string) || 'demo-student-001';
+    const userId = req.userId!;
     const clientApiKey = req.headers['x-gemini-key'] as string | undefined;
 
     const {
@@ -38,6 +39,10 @@ generateRouter.post('/test', async (req, res) => {
       const doc = db.getDocument(document_id);
       if (!doc) {
         return res.status(404).json({ error: 'Selected study document was not found.' });
+      }
+      // Ensure document belongs to user or is a system sample document
+      if (doc.user_id !== userId && doc.user_id !== 'system') {
+        return res.status(403).json({ error: 'Access denied: You do not have permission to generate an exam from this document.' });
       }
       sourceText = doc.extracted_text;
       docName = doc.filename;

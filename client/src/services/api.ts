@@ -16,12 +16,10 @@ function getHeaders(isFormData = false): Record<string, string> {
     headers['Content-Type'] = 'application/json';
   }
 
-  const user = localStorage.getItem('prepiq_user');
-  if (user) {
-    try {
-      const parsed = JSON.parse(user);
-      if (parsed.id) headers['x-user-id'] = parsed.id;
-    } catch (_) {}
+  // Cryptographically signed JWT token stored in localStorage (persistent) or sessionStorage (transient)
+  const token = localStorage.getItem('prepiq_token') || sessionStorage.getItem('prepiq_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
   const geminiKey = localStorage.getItem('prepiq_gemini_key');
@@ -54,22 +52,31 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 export const api = {
   // Auth
-  async login(email: string, password?: string, isDemo = false): Promise<{ success: boolean; user: UserProfile }> {
+  async login(email: string, password?: string, rememberMe = true): Promise<{ success: boolean; user: UserProfile; token: string }> {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ email, password, isDemo })
+      body: JSON.stringify({ email, password, rememberMe })
     });
-    return handleResponse<{ success: boolean; user: UserProfile }>(res);
+    return handleResponse<{ success: boolean; user: UserProfile; token: string }>(res);
   },
 
-  async register(data: { name: string; email: string; password?: string; college?: string; course?: string; year_of_study?: string }): Promise<{ success: boolean; user: UserProfile }> {
+  async register(data: { name: string; email: string; password?: string; college?: string; course?: string; year_of_study?: string }): Promise<{ success: boolean; user: UserProfile; token: string }> {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(data)
     });
-    return handleResponse<{ success: boolean; user: UserProfile }>(res);
+    return handleResponse<{ success: boolean; user: UserProfile; token: string }>(res);
+  },
+
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ email })
+    });
+    return handleResponse<{ success: boolean; message: string }>(res);
   },
 
   async getCurrentUser(): Promise<UserProfile> {

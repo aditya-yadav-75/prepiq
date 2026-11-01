@@ -1,10 +1,11 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { db } from '../data/database.js';
 import { DocumentExtractor } from '../services/documentExtractor.js';
 import { StudyDocument } from '../types/index.js';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const documentsRouter = Router();
 
@@ -18,8 +19,10 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (_req, file, cb) => {
+    // Sanitize filename to prevent directory traversal or arbitrary characters
+    const cleanName = path.basename(file.originalname).replace(/[^a-zA-Z0-9._-]/g, '_');
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${uniqueSuffix}-${file.originalname}`);
+    cb(null, `${uniqueSuffix}-${cleanName}`);
   }
 });
 
@@ -36,26 +39,31 @@ const upload = multer({
   }
 });
 
-// GET all documents for the current user
-documentsRouter.get('/', (req, res) => {
-  const userId = (req.headers['x-user-id'] as string) || 'demo-student-001';
+// GET all documents for the authenticated user
+documentsRouter.get('/', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.userId!;
   const docs = db.getDocuments(userId);
   res.json({ documents: docs });
 });
 
-// GET single document
-documentsRouter.get('/:id', (req, res) => {
-  const doc = db.getDocument(req.params.id);
+// GET single document with ownership check
+documentsRouter.get('/:id', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const docId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const doc = db.getDocument(docId);
   if (!doc) {
     return res.status(404).json({ error: 'Document not found' });
+  }
+  // Allow viewing if owned by user or if it is a system sample document
+  if (doc.user_id !== req.userId && doc.user_id !== 'system') {
+    return res.status(403).json({ error: 'Access denied: You do not have permission to view this document.' });
   }
   res.json({ document: doc });
 });
 
 // POST upload file
-documentsRouter.post('/upload', upload.single('file'), async (req, res) => {
+documentsRouter.post('/upload', requireAuth, upload.single('file'), async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = (req.headers['x-user-id'] as string) || 'demo-student-001';
+    const userId = req.userId!;
     const file = req.file;
     const subject = (req.body.subject as string) || 'General';
 
@@ -106,9 +114,9 @@ documentsRouter.post('/upload', upload.single('file'), async (req, res) => {
 });
 
 // POST paste text directly
-documentsRouter.post('/raw', (req, res) => {
+documentsRouter.post('/raw', requireAuth, (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = (req.headers['x-user-id'] as string) || 'demo-student-001';
+    const userId = req.userId!;
     const { title, subject, content } = req.body;
 
     if (!content || typeof content !== 'string') {
@@ -153,9 +161,20 @@ documentsRouter.post('/raw', (req, res) => {
 });
 
 // DELETE document
-documentsRouter.delete('/:id', (req, res) => {
-  const userId = (req.headers['x-user-id'] as string) || 'demo-student-001';
-  const deleted = db.deleteDocument(req.params.id, userId);
+documentsRouter.delete('/:id', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const docId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const doc = db.getDocument(docId);
+  if (!doc) {
+    return res.status(404).json({ error: 'Document not found' });
+  }
+  if (doc.user_id === 'system') {
+    return res.status(403).json({ error: 'System sample materials cannot be deleted.' });
+  }
+  if (doc.user_id !== req.userId) {
+    return res.status(403).json({ error: 'Access denied: You do not have permission to delete this document.' });
+  }
+
+  const deleted = db.deleteDocument(docId, req.userId!);
   if (!deleted) {
     return res.status(404).json({ error: 'Document not found or unauthorized' });
   }

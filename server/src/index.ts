@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -18,12 +18,23 @@ const app = express();
 const PORT = Number(process.env.PORT) || 5001;
 const HOST = '0.0.0.0';
 
-// Middleware
+// Security Headers Middleware
+app.use((_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  next();
+});
+
+// Hardened CORS policy
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id', 'x-gemini-key']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-gemini-key']
 }));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -32,11 +43,12 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'healthy',
     service: 'PrepIQ API Server',
+    auth_mode: 'JWT Bearer (HS256)',
     timestamp: new Date().toISOString()
   });
 });
 
-// Mount Routes
+// Mount Protected & Public API Routers
 app.use('/api/auth', authRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/api/generate', generateRouter);
@@ -54,6 +66,16 @@ app.get('*', (req, res, next) => {
     return next();
   }
   res.sendFile(path.join(clientDistPath, 'index.html'));
+});
+
+// Centralized API Error Handling Middleware
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('[UNHANDLED SERVER ERROR]', err);
+  const status = err.status || 500;
+  const message = process.env.NODE_ENV === 'production' 
+    ? 'An unexpected error occurred. Please try again later.' 
+    : (err.message || 'Internal Server Error');
+  res.status(status).json({ error: message });
 });
 
 // Start Server
