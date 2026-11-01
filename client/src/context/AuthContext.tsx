@@ -33,21 +33,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(parsed);
       } catch (_) {
         localStorage.removeItem('prepiq_user');
+        setUser(null);
       }
     } else {
-      // Default to demo student for frictionless evaluator experience
-      const defaultDemoUser: UserProfile = {
-        id: 'demo-student-001',
-        name: 'Aditya Yadav',
-        email: 'student@prepiq.edu',
-        college: 'Apex Institute of Technology',
-        course: 'Computer Science & AI',
-        year_of_study: '3rd Year',
-        created_at: new Date().toISOString(),
-        avatar_color: '#1649E8'
-      };
-      setUser(defaultDemoUser);
-      localStorage.setItem('prepiq_user', JSON.stringify(defaultDemoUser));
+      setUser(null);
     }
     setIsLoading(false);
   }, []);

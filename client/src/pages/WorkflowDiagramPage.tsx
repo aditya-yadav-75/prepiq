@@ -113,15 +113,11 @@ export const WorkflowDiagramPage: React.FC<WorkflowDiagramPageProps> = ({ onNavi
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="lime" size="sm">Academic Rubric Criteria 2 (5 Marks)</Badge>
-            <span className="text-xs text-mutedText dark:text-slate-400">• 8-Stage Processing Pipeline</span>
-          </div>
           <h2 className="text-2xl sm:text-3xl font-black text-darkText dark:text-white tracking-tight">
-            System Workflow & Architecture Pipeline
+            System Workflow & Architecture
           </h2>
-          <p className="text-xs sm:text-sm text-mutedText dark:text-slate-400">
-            Explore the multi-stage pipeline connecting raw study material ingestion to validated practice examination delivery.
+          <p className="text-xs sm:text-sm text-mutedText dark:text-slate-400 mt-1">
+            Explore the complete processing pipeline from study material ingestion to automated examination evaluation.
           </p>
         </div>
 
@@ -225,7 +221,7 @@ export const WorkflowDiagramPage: React.FC<WorkflowDiagramPageProps> = ({ onNavi
       <GlassCard className="p-6 sm:p-8 space-y-4">
         <div className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-cobalt dark:text-neon-lime" />
-          <h3 className="text-lg font-bold text-darkText dark:text-white">Rubric Requirement: Trigger-Action Automated Workflow</h3>
+          <h3 className="text-lg font-bold text-darkText dark:text-white">Automated Evaluation Pipeline: Trigger-Action Workflow</h3>
         </div>
         <p className="text-xs sm:text-sm text-mutedText dark:text-slate-400 leading-relaxed">
           PrepIQ implements an automated end-to-end evaluation workflow. Upon test submission, the system triggers a 5-step automated sequence that evaluates submitted answers against objective keys and rubric criteria, recalculates scores, decomposes weak topics, commits results to persistent storage, and refreshes the student's dashboard analytics without any manual intervention.

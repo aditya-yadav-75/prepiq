@@ -3,7 +3,6 @@ import { Eye, EyeOff, Sparkles, ArrowRight, ShieldCheck, Mail, Lock } from 'luci
 import { useAuth } from '../context/AuthContext.js';
 import { Button } from '../components/ui/Button.js';
 import { GlassCard } from '../components/ui/GlassCard.js';
-import { ThemeToggle } from '../components/ui/ThemeToggle.js';
 
 interface LoginPageProps {
   onNavigate: (page: string) => void;

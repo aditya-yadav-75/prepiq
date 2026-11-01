@@ -69,15 +69,11 @@ Academic integrity and factual accuracy are more important than question quantit
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="lime" size="sm">Academic Rubric Criteria 2 (5 Marks)</Badge>
-            <span className="text-xs text-mutedText dark:text-slate-400">• Three Tested Versions</span>
-          </div>
           <h2 className="text-2xl sm:text-3xl font-black text-darkText dark:text-white tracking-tight">
             Prompt Engineering & Evaluation Lab
           </h2>
-          <p className="text-xs sm:text-sm text-mutedText dark:text-slate-400">
-            Inspect system prompts, task decomposition architectures, and side-by-side prompt version benchmark comparisons.
+          <p className="text-xs sm:text-sm text-mutedText dark:text-slate-400 mt-1">
+            Explore prompt architectures and compare generation quality across multiple versions.
           </p>
         </div>
 

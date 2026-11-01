@@ -1,83 +1,65 @@
 import React from 'react';
-import { Sparkles, ArrowRight, ShieldCheck, Cpu } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { Button } from '../ui/Button.js';
-import { ThemeToggle } from '../ui/ThemeToggle.js';
+import { useAuth } from '../../context/AuthContext.js';
 
 interface NavbarProps {
   onNavigate: (page: string) => void;
   currentPage: string;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
+  const { user } = useAuth();
+
+  const handleLaunch = () => {
+    if (user) {
+      onNavigate('dashboard');
+    } else {
+      onNavigate('login');
+    }
+  };
+
   return (
-    <header className="sticky top-4 z-40 px-4 max-w-7xl mx-auto">
-      <nav className="glass-card rounded-2xl px-5 py-3.5 flex items-center justify-between border border-white/80 dark:border-white/10 shadow-glass dark:shadow-glass-dark">
-        {/* Logo */}
+    <header className="sticky top-0 z-40 w-full bg-white/85 dark:bg-[#070E28]/90 backdrop-blur-md border-b border-slate-200/70 dark:border-white/10 transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        {/* Left: Brand Identity */}
         <div 
           onClick={() => onNavigate('landing')}
           className="flex items-center gap-2.5 cursor-pointer group select-none"
         >
-          <div className="w-10 h-10 rounded-xl bg-cobalt flex items-center justify-center shadow-md shadow-cobalt/30 group-hover:scale-105 transition-transform duration-200">
-            <span className="text-neon-lime font-black text-xl tracking-tighter">P</span>
-            <span className="text-white font-black text-xl tracking-tighter">Q</span>
+          <div className="w-9 h-9 rounded-xl bg-cobalt flex items-center justify-center shadow-md shadow-cobalt/25 group-hover:scale-105 transition-transform duration-200">
+            <span className="text-neon-lime font-black text-lg tracking-tighter">P</span>
+            <span className="text-white font-black text-lg tracking-tighter">Q</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-xl font-extrabold tracking-tight text-darkText dark:text-white">Prep<span className="text-cobalt dark:text-neon-lime">IQ</span></span>
-            <span className="px-1.5 py-0.5 text-[10px] font-black uppercase bg-neon-lime text-navy-deep rounded-md tracking-wider">AI</span>
+            <span className="text-xl font-extrabold tracking-tight text-darkText dark:text-white">
+              Prep<span className="text-cobalt dark:text-neon-lime">IQ</span>
+            </span>
+            <span className="px-1.5 py-0.5 text-[10px] font-black uppercase bg-neon-lime text-navy-deep rounded-md tracking-wider">
+              AI
+            </span>
           </div>
         </div>
 
-        {/* Center Links */}
-        <div className="hidden md:flex items-center gap-1 text-sm font-medium text-mutedText dark:text-slate-300">
+        {/* Right: Clean SaaS Actions */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
-            onClick={() => onNavigate('landing')}
-            className={`px-3 py-1.5 rounded-xl transition-all ${currentPage === 'landing' ? 'text-cobalt dark:text-neon-lime font-semibold bg-cobalt/5 dark:bg-white/5' : 'hover:text-darkText dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/60'}`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => onNavigate('workflow')}
-            className={`px-3 py-1.5 rounded-xl transition-all ${currentPage === 'workflow' ? 'text-cobalt dark:text-neon-lime font-semibold bg-cobalt/5 dark:bg-white/5' : 'hover:text-darkText dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/60'}`}
-          >
-            Workflow Pipeline
-          </button>
-          <button
-            onClick={() => onNavigate('prompts')}
-            className={`px-3 py-1.5 rounded-xl transition-all ${currentPage === 'prompts' ? 'text-cobalt dark:text-neon-lime font-semibold bg-cobalt/5 dark:bg-white/5' : 'hover:text-darkText dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/60'}`}
-          >
-            Prompt Lab
-          </button>
-          <button
-            onClick={() => onNavigate('test-suite')}
-            className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${currentPage === 'test-suite' ? 'text-cobalt dark:text-neon-lime font-semibold bg-cobalt/5 dark:bg-white/5' : 'hover:text-darkText dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/60'}`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-cobalt dark:text-neon-lime" />
-            Validation Suite
-          </button>
-        </div>
-
-        {/* Action Buttons & Liquid Glass Theme Toggle */}
-        <div className="flex items-center gap-2.5">
-          <ThemeToggle />
-
-          <Button
-            variant="ghost"
-            size="sm"
             onClick={() => onNavigate('login')}
-            className="hidden sm:inline-flex"
+            className="px-3.5 py-2 text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-cobalt dark:hover:text-neon-lime rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-all"
           >
-            Log in
-          </Button>
+            Login
+          </button>
           <Button
             variant="lime"
             size="sm"
-            onClick={() => onNavigate('dashboard')}
-            icon={<Sparkles className="w-4 h-4" />}
+            onClick={handleLaunch}
+            icon={<Sparkles className="w-4 h-4 text-navy-deep" />}
+            className="shadow-xs font-bold"
           >
             Launch App
           </Button>
         </div>
-      </nav>
+      </div>
     </header>
   );
 };

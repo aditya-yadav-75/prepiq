@@ -3,7 +3,6 @@ import { Sparkles, ArrowRight, User, Mail, Lock, GraduationCap, BookOpen, Calend
 import { useAuth } from '../context/AuthContext.js';
 import { Button } from '../components/ui/Button.js';
 import { GlassCard } from '../components/ui/GlassCard.js';
-import { ThemeToggle } from '../components/ui/ThemeToggle.js';
 
 interface RegisterPageProps {
   onNavigate: (page: string) => void;

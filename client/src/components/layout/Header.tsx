@@ -2,7 +2,6 @@ import React from 'react';
 import { Menu, Bell, Sparkles, Cpu } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { Button } from '../ui/Button.js';
-import { ThemeToggle } from '../ui/ThemeToggle.js';
 
 interface HeaderProps {
   onOpenSidebar: () => void;
@@ -37,7 +36,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar, onNavigate }) => 
           </div>
         </div>
 
-        {/* Right: AI Engine Status, Theme Toggle, Quick Action & Notifications */}
+        {/* Right: AI Engine Status, Quick Action & Notifications */}
         <div className="flex items-center gap-3">
           {/* AI Model Indicator Pill */}
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 shadow-xs text-xs font-semibold text-darkText dark:text-slate-200">
@@ -45,9 +44,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSidebar, onNavigate }) => 
             <Cpu className="w-3.5 h-3.5 text-cobalt dark:text-neon-lime" />
             <span>{geminiKey ? 'Gemini 1.5 Flash' : 'Hybrid AI Engine'}</span>
           </div>
-
-          {/* Liquid Glass Theme Toggle */}
-          <ThemeToggle />
 
           <Button
             variant="primary"

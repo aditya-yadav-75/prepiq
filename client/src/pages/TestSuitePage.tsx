@@ -73,15 +73,11 @@ export const TestSuitePage: React.FC = () => {
       {/* Top Banner */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="lime" size="sm">Academic Rubric Criteria 3 (5 Marks)</Badge>
-            <span className="text-xs text-mutedText dark:text-slate-400">• Five Mandated Test Cases + Edge Cases</span>
-          </div>
           <h2 className="text-2xl sm:text-3xl font-black text-darkText dark:text-white tracking-tight">
-            Output Validation & Test Suite Center
+            Output Validation & Test Suite
           </h2>
-          <p className="text-xs sm:text-sm text-mutedText dark:text-slate-400">
-            Automated test harness validating accuracy, edge-case rejection, duplicate filtering, and MCQ invariants.
+          <p className="text-xs sm:text-sm text-mutedText dark:text-slate-400 mt-1">
+            Evaluate question quality, answer consistency, duplicate detection and source grounding.
           </p>
         </div>
 
@@ -119,7 +115,7 @@ export const TestSuitePage: React.FC = () => {
                 </Badge>
               </div>
               <p className="text-xs text-darkText/80 dark:text-slate-300 mt-1">
-                Verified against Section 10 deliverables: Normal Input, Edge-Case Empty Document, Unsupported Information, Duplicate Detection, and Answer Key Consistency.
+                Automated test harness passing: Normal Input, Edge-Case Empty Document, Unsupported Information, Duplicate Detection, and Answer Key Consistency.
               </p>
             </div>
           </div>

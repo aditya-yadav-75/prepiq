@@ -28,7 +28,7 @@ interface NavigationState {
 }
 
 const MainApp: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [nav, setNav] = useState<NavigationState>({ page: 'landing' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -38,6 +38,13 @@ const MainApp: React.FC = () => {
   };
 
   const isPublicPage = nav.page === 'landing' || nav.page === 'login' || nav.page === 'register';
+
+  // Protect authenticated routes: redirect unauthenticated users to login
+  React.useEffect(() => {
+    if (!isLoading && !user && !isPublicPage) {
+      setNav({ page: 'login' });
+    }
+  }, [user, isLoading, isPublicPage]);
 
   return (
     <div className="min-h-screen bg-softBg dark:bg-darkBg text-darkText dark:text-slate-100 font-sans flex flex-col selection:bg-neon-lime selection:text-navy-deep transition-colors duration-300">

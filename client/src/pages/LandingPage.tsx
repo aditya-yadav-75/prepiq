@@ -11,22 +11,36 @@ import {
   FileText, 
   ChevronRight,
   BookOpen,
-  Award,
-  Sun,
-  Moon
+  Award
 } from 'lucide-react';
 import { Button } from '../components/ui/Button.js';
 import { GlassCard } from '../components/ui/GlassCard.js';
 import { Badge } from '../components/ui/Badge.js';
-import { LiquidGlassToggle } from '../components/ui/LiquidGlassToggle.js';
-import { useTheme } from '../context/ThemeContext.js';
+import { useAuth } from '../context/AuthContext.js';
 
 interface LandingPageProps {
   onNavigate: (page: string) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
-  const { resolvedTheme, toggleTheme } = useTheme();
+  const { user } = useAuth();
+
+  const handleGenerateClick = () => {
+    if (user) {
+      onNavigate('generate');
+    } else {
+      onNavigate('login');
+    }
+  };
+
+  const handleExploreClick = () => {
+    const el = document.getElementById('features');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      onNavigate(user ? 'workflow' : 'login');
+    }
+  };
 
   return (
     <div className="space-y-24 pb-20">
@@ -61,47 +75,33 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             Turn your notes, PDFs and textbooks into personalised practice exams with AI-generated questions, source-grounded answers, and validated answer keys.
           </p>
 
-          {/* CTAs & Theme Quick Toggle */}
+          {/* CTAs */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
             <Button
               variant="lime"
               size="lg"
-              onClick={() => onNavigate('generate')}
+              onClick={handleGenerateClick}
               icon={<Sparkles className="w-5 h-5 text-navy-deep" />}
-              className="text-base"
+              className="text-base font-bold shadow-sm"
             >
               Generate Your First Test
             </Button>
             <Button
               variant="secondary"
               size="lg"
-              onClick={() => onNavigate('workflow')}
+              onClick={handleExploreClick}
               icon={<ArrowRight className="w-4 h-4 text-cobalt dark:text-neon-lime" />}
+              className="text-base font-bold"
             >
               Explore Features & Pipeline
             </Button>
           </div>
 
-          {/* Liquid Glass Theme Switcher Showcase on Hero */}
-          <div className="pt-2 flex items-center justify-center">
-            <div className="p-2 px-4 rounded-full bg-white/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-white/10 shadow-xs flex items-center gap-3">
-              <span className="text-xs font-semibold text-mutedText dark:text-slate-400 flex items-center gap-1.5">
-                {resolvedTheme === 'dark' ? <Moon className="w-3.5 h-3.5 text-neon-lime" /> : <Sun className="w-3.5 h-3.5 text-amber-500" />}
-                <span>Liquid Glass {resolvedTheme === 'dark' ? 'Dark' : 'Light'} Theme</span>
-              </span>
-              <LiquidGlassToggle
-                checked={resolvedTheme === 'dark'}
-                onChange={toggleTheme}
-                size="sm"
-              />
-            </div>
-          </div>
-
           {/* Trust badges */}
-          <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs font-semibold text-mutedText dark:text-slate-400">
+          <div className="flex flex-wrap items-center justify-center gap-6 pt-6 text-xs font-semibold text-mutedText dark:text-slate-400">
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              Source-Grounded (Zero Hallucination)
+              Source-Grounded Quality Checks
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -223,7 +223,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* 5 CORE FEATURES */}
-      <section className="max-w-6xl mx-auto px-4 space-y-12">
+      <section id="features" className="max-w-6xl mx-auto px-4 space-y-12 scroll-mt-24">
         <div className="text-center space-y-3">
           <Badge variant="cobalt">Engineered for Academic Excellence</Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-darkText dark:text-white tracking-tight">
@@ -363,16 +363,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <Button
               variant="lime"
               size="lg"
-              onClick={() => onNavigate('dashboard')}
+              onClick={() => onNavigate(user ? 'dashboard' : 'login')}
               icon={<Sparkles className="w-5 h-5 text-navy-deep" />}
+              className="font-bold"
             >
               Start Practice Session
             </Button>
             <Button
               variant="secondary"
               size="lg"
-              onClick={() => onNavigate('test-suite')}
+              onClick={() => onNavigate(user ? 'test-suite' : 'login')}
               icon={<ShieldCheck className="w-5 h-5 text-cobalt dark:text-neon-lime" />}
+              className="font-bold"
             >
               Run Validation Suite
             </Button>
@@ -381,13 +383,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* FOOTER */}
-      <footer className="max-w-6xl mx-auto px-4 pt-12 border-t border-slate-200/80 dark:border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-mutedText dark:text-slate-400">
+      <footer className="max-w-6xl mx-auto px-4 pt-12 pb-6 border-t border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-mutedText dark:text-slate-400">
         <div className="flex items-center gap-2">
           <span className="font-extrabold text-darkText dark:text-white">PrepIQ</span>
-          <span>• Academic Examination Generator</span>
+          <span>• AI Exam Preparation Platform</span>
         </div>
         <div>
-          <span>Designed with Apple Liquid Glass & Minimalist SaaS Aesthetics</span>
+          <span className="font-medium">Designed by Aditya Yadav in India.</span>
         </div>
       </footer>
     </div>
