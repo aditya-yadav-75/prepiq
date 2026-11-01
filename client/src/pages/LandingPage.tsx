@@ -9,8 +9,7 @@ import {
   Clock, 
   BarChart3, 
   FileText, 
-  ChevronRight,
-  BookOpen,
+  BookOpen, 
   Award
 } from 'lucide-react';
 import { Button } from '../components/ui/Button.js';
@@ -45,20 +44,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   return (
     <div className="space-y-24 pb-20">
       {/* HERO SECTION */}
-      <section className="relative pt-24 sm:pt-32 overflow-hidden">
+      <section className="relative pt-20 sm:pt-24 overflow-hidden">
         {/* Ambient liquid glow background */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-cobalt/20 via-electric/15 to-neon-lime/20 blur-3xl -z-10 rounded-full pointer-events-none" />
 
         <div className="max-w-5xl mx-auto text-center px-4 space-y-6">
-          {/* Eyebrow badge with Liquid Glass theme pill */}
-          <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-white/10 shadow-xs backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-neon-lime animate-pulse shadow-glow-lime" />
-            <span className="text-xs font-bold text-darkText dark:text-slate-200 tracking-wide">Next-Gen Academic Assessment Platform</span>
-            <span className="text-cobalt dark:text-neon-lime font-bold text-xs flex items-center gap-0.5">
-              PrepIQ 2.0 <ChevronRight className="w-3.5 h-3.5" />
-            </span>
-          </div>
-
           {/* Main Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-darkText dark:text-white tracking-tight leading-[1.08]">
             Study smarter.<br />
