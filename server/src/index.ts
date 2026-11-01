@@ -3,8 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load environment variables
+// Load environment variables from process.cwd() or local server/.env
 dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../server/.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 import { validateJwtConfiguration } from './utils/jwt.js';
 
