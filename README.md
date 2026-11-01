@@ -1,129 +1,230 @@
-# PrepIQ — AI Exam Practice Generator
+# PrepIQ — AI-Powered Exam Practice Generator
 
-> **"Study smarter. Practice sharper."**  
-> *Turn your notes, PDFs and textbooks into personalised practice exams with AI-generated questions and validated answer keys.*
+> **Study smarter. Practice sharper.**
+>
+> Transform your notes, PDFs, and textbooks into personalised practice examinations with AI-generated questions, validated answer keys, and performance analytics.
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](#)
-[![React](https://img.shields.io/badge/React-18.3-61dafb)](#)
-[![Node.js](https://img.shields.io/badge/Node.js-v24-green)](#)
-[![Security Audit](https://img.shields.io/badge/Security%20Audit-15%2F15%20Passed-A6FF00?labelColor=092B9B)](#)
-[![Validation Suite](https://img.shields.io/badge/Validation%20Suite-6%2F6%20Passed-A6FF00?labelColor=092B9B)](#)
+<p align="center">
+  <a href="https://prepiq-upc7.onrender.com/">
+    <strong>Live Application</strong>
+  </a>
+  &nbsp; | &nbsp;
+  <a href="https://github.com/aditya-yadav-75/prepiq">
+    <strong>GitHub Repository</strong>
+  </a>
+</p>
 
----
-
-## 1. Project Overview & Problem Statement
-
-### The Problem
-University and professional certification students spend hours reviewing dense textbooks and lecture notes, yet often lack effective active recall practice exams. Traditional study approaches rely on either generic, unaligned question banks or fragile generic LLM prompts that suffer from:
-1. **Hallucination & Speculation**: Inventing facts outside course materials.
-2. **Ambiguous or Inconsistent Answer Keys**: Producing multiple correct answers or options that contradict explanations.
-3. **Redundancy**: Repeating the exact same concept multiple times.
-4. **Lack of Transparent Rubrics**: Providing vague feedback on subjective or short-answer questions.
-
-### The PrepIQ Solution
-**PrepIQ** is an academic assessment platform built under the category of **Student Productivity**. PrepIQ ingests user-supplied study materials (PDF, DOCX, TXT), identifies conceptual taxonomies, and generates structured, difficulty-controlled practice examinations with source-grounded answer keys. It integrates a **Dual-Layer Answer Validation Engine** and an **Automated Evaluation Workflow** that evaluates student submissions, identifies weak topic areas, and updates performance analytics without manual steps.
+<p align="center">
+  <img src="https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black" />
+  <img src="https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Node.js-v24-339933?logo=nodedotjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/AI-Google%20Gemini-4285F4?logo=google&logoColor=white" />
+  <img src="https://img.shields.io/badge/License-MIT-lightgrey" />
+</p>
 
 ---
 
-## 2. Key Features
+## 1. Project Overview
 
-- **Multi-Format Document Ingestion**: Ingests PDF, Microsoft Word DOCX, and plain text notes with character threshold validation (`MIN_CHARS = 100`) and automatic topic extraction.
-- **Configurable Practice Examinations**: Customize question count (5–30), cognitive difficulty (Easy, Medium, Hard, Mixed), and formats (MCQs, True/False, Short Answer, Fill-in-the-blanks, Descriptive).
-- **Three Tested Prompt Versions (V1, V2, V3)**:
-  - *Version 1 (Baseline)*: Rapid factual recall.
-  - *Version 2 (Context-Aware)*: Topic distribution and Bloom's cognitive taxonomy.
-  - *Version 3 (Grounded & Rubric-Validated)*: Exact paragraph citations, Jaccard duplicate rejection, and objective grading rubrics.
-- **Dual-Layer Answer Validation**: Every question is verified for source support, single-answer MCQ integrity, and duplicate avoidance before deployment.
-- **Interactive Practice Exam Experience**: Clean environment with countdown timer, question palette, review flags, and submission confirmation.
-- **Validated Answer Key & Rubric Breakdown**: Side-by-side comparison of student responses against designated answers, source paragraph citations, and transparent rubric criteria.
-- **Automated Trigger-Action Workflow**: Automatically evaluates submitted answers, computes scores, decomposes weak topics, commits results to persistent storage, and refreshes analytics.
-- **Continuous Performance Analytics**: Recharts-powered progression curves, subject-wise mastery, difficulty-wise accuracy, and weak topic alerts.
-- **Live Validation Test Suite**: Internal test runner verifying 6 test cases (including edge cases and hallucination detection) with real-time assertion reporting.
-- **Apple Liquid Glass Design Language**: Inspired by Apple's ultra-translucent Liquid Glass UI (`backdrop-filter: blur(32px) saturate(190%)`), subtle specular reflections, and fine borders.
+PrepIQ is an AI-powered academic assessment platform developed under the category of **Student Productivity**.
 
----
+Students often spend hours reviewing textbooks, lecture notes, and study materials but struggle to find relevant practice questions that accurately reflect their syllabus.
 
-## 3. Technology Stack
+Traditional approaches often suffer from:
 
-### Frontend Client
-- **Framework**: React 18 with TypeScript 5
-- **Build Tool**: Vite 5
-- **Styling**: Tailwind CSS 3 with custom Apple Liquid Glass utilities (`backdrop-filter: blur(32px) saturate(190%)`)
-- **Icons**: Lucide React
-- **Data Visualizations**: Recharts
-- **Animations & Transitions**: Framer Motion
+- Generic questions that are not aligned with the supplied study material.
+- Incorrect or ambiguous answer keys.
+- Repetitive questions testing the same concepts.
+- Inconsistent evaluation of descriptive answers.
+- Limited insight into individual learning gaps.
 
-### Backend Server
-- **Runtime**: Node.js v24
-- **Framework**: Express.js with TypeScript
-- **Security & Cryptography**: Signed HMAC-SHA256 JWT tokens, `crypto.scrypt` password hashing, timing-safe equality verification, rate limiting, and security headers (`nosniff`, `DENY`, `strict-origin`)
-- **Document Processing**: `pdf-parse` (PDF extraction), `mammoth` (DOCX extraction), UTF-8 text sanitization
-- **AI Integration**: `@google/generative-ai` (Google Gemini 1.5 Flash) with fallback to internal semantic generation engine
-- **Persistence**: Concurrency-safe atomic file storage (`store.json`) with configurable `DATA_DIR` and immutable `'system'` curriculum resources
+**PrepIQ addresses these challenges** by converting student-provided study materials into structured practice examinations. It uses AI-powered question generation, answer validation, automated evaluation, and performance analytics to make exam preparation more focused and effective.
+
+## 2. Live Demo & Project Video
+
+| Resource | Link |
+|---|---|
+| Live Application | https://prepiq-upc7.onrender.com/ |
+| GitHub Repository | https://github.com/aditya-yadav-75/prepiq |
+| Project Demonstration | **[Add your video link here]** |
+
+### Project Demonstration Video
+
+Watch the complete walkthrough of PrepIQ, including document uploads, AI question generation, practice examinations, automated evaluation, and performance analytics.
+
+**Video Link:** `PASTE_YOUR_YOUTUBE_OR_GOOGLE_DRIVE_LINK_HERE`
+
+<!-- Optional: Replace the placeholder above with a YouTube thumbnail link when your video is uploaded. -->
 
 ---
 
-## 4. Security & Authentication Architecture
+## 3. Key Features
 
-PrepIQ implements enterprise-grade academic authorization and session security:
+### AI-Powered Question Generation
+- Upload PDF, DOCX, and TXT study materials.
+- Automatically extract and analyse educational content.
+- Generate questions based on the uploaded material.
+- Configure question count, difficulty, and question format.
 
-1. **Server-Validated JWT Bearer Tokens (`HS256`)**:
-   - Authentication tokens are cryptographically signed using HMAC-SHA256 (`crypto.createHmac`) and validated on every protected request.
-   - Client requests provide credentials via standard `Authorization: Bearer <token>` headers. Frontend-trusted headers (`x-user-id`) are completely disabled and rejected.
-   - The server validates the algorithm (`alg === 'HS256'`), token expiration (`exp > now`), and issue timestamp (`iat`).
-   - Server fails safely at boot if `JWT_SECRET` is missing, empty, or shorter than 32 characters.
-2. **Cryptographic Password Hashing (`scrypt`)**:
-   - User passwords are encrypted with Node.js built-in `crypto.scrypt` using unique 16-byte cryptographic salts.
-   - Verification utilizes `crypto.timingSafeEqual` to eliminate timing side-channel attacks.
-   - Passwords require a minimum of 8 characters, containing both letters and numbers/symbols on both frontend and backend.
-3. **Strict Resource Ownership & Isolation (IDOR Prevention)**:
-   - All protected routes (`/api/documents`, `/api/tests`, `/api/generate/test`, `/api/generate/compare-prompts`, `/api/test-suite`, `/api/analytics`, `/api/system`) enforce ownership verification via `requireAuth` middleware.
-   - Cross-user data snooping, tampering, or deletion returns `HTTP 403 Forbidden`.
-   - Sample curriculum notes (Operating Systems, Machine Learning, Computer Systems) are marked with `user_id: 'system'`, making them accessible to all enrolled students while remaining immutable against unauthorized deletion.
-4. **Rate Limiting**:
-   - Authentication endpoints (`/api/auth/login`, `/api/auth/register`) are rate-limited to 25 requests per 15-minute window per IP.
-   - AI generation endpoints (`/api/generate/test`, `/api/generate/compare-prompts`) are rate-limited to 35 jobs per 10-minute window per IP.
-5. **Session Persistence Control**:
-   - Selecting **"Remember this device"** stores the signed JWT in `localStorage` for 30-day persistence.
-   - Deselecting it stores the token strictly in `sessionStorage` (cleared immediately when the browser tab closes).
-   - On logout, all tokens and session storage entries are completely purged.
-6. **Security Headers & Defense-in-Depth**:
-   - Enforces `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`, and `Referrer-Policy: strict-origin-when-cross-origin`.
-   - File uploads are validated via Multer with strict MIME checking, 15MB file size limits, and filename sanitization against path traversal attacks.
-   - Restricted CORS allowlist configurable via `CORS_ORIGIN` with same-origin production serving support.
+### Customisable Practice Examinations
+- Question count: 5–30 questions.
+- Difficulty levels: Easy, Medium, Hard, and Mixed.
+- Supported formats:
+  - Multiple Choice Questions (MCQs)
+  - True / False
+  - Short Answer
+  - Fill in the Blanks
+  - Descriptive Questions
+
+### Three Prompt Engineering Versions
+
+PrepIQ implements three prompt versions to evaluate and improve question-generation quality.
+
+| Version | Description |
+|---|---|
+| V1 — Baseline | Focuses on rapid factual recall. |
+| V2 — Context-Aware | Incorporates topic distribution and Bloom's cognitive taxonomy. |
+| V3 — Grounded & Rubric-Validated | Focuses on source grounding, duplicate rejection, and structured grading rubrics. |
+
+### Answer Validation Engine
+- Validates generated questions against source material.
+- Checks MCQ answer consistency.
+- Detects repetitive questions.
+- Provides explanations and source references.
+- Uses objective checkpoints for descriptive answer evaluation.
+
+### Interactive Examination Interface
+- Countdown timer.
+- Interactive question palette.
+- Question review flags.
+- Submission confirmation.
+- Structured examination experience.
+
+### Automated Evaluation
+- Automatically evaluates submitted answers.
+- Calculates examination scores.
+- Identifies weak topic areas.
+- Generates feedback and explanations.
+- Updates performance records.
+
+### Performance Analytics
+- Progression tracking.
+- Subject-wise performance.
+- Difficulty-wise accuracy.
+- Weak-topic identification.
+- Visual performance dashboards.
+
+### Additional Features
+- Internal academic validation test suite.
+- Secure authentication and user-specific data access.
+- Apple-inspired Liquid Glass interface.
+- Responsive application interface.
+
+---
+
+## 4. Technology Stack
+
+### Frontend
+
+| Technology | Purpose |
+|---|---|
+| React 18 | User interface |
+| TypeScript | Type safety |
+| Vite | Development and build tooling |
+| Tailwind CSS | Styling and design system |
+| Framer Motion | Animations and transitions |
+| Lucide React | Icons |
+| Recharts | Data visualisation |
+
+### Backend
+
+| Technology | Purpose |
+|---|---|
+| Node.js | Runtime environment |
+| Express.js | REST API |
+| TypeScript | Backend development |
+| JSON Storage | Application data persistence |
+| JWT | Authentication |
+| Node.js Crypto / scrypt | Password hashing |
+| Multer | File uploads |
+| pdf-parse | PDF text extraction |
+| Mammoth | DOCX text extraction |
+| Google Gemini API | AI-powered generation |
 
 ---
 
 ## 5. System Architecture
 
+PrepIQ follows a client-server architecture.
+
+```text
+                  STUDENT
+                     |
+                     v
+            REACT FRONTEND
+             (Vite + TS)
+                     |
+                     v
+              EXPRESS API
+                     |
+          +----------+----------+
+          |          |          |
+          v          v          v
+      AUTHENTICATION DOCUMENT   AI ENGINE
+        (JWT)      PROCESSING  (GEMINI)
+          |          |          |
+          +----------+----------+
+                     |
+                     v
+            QUESTION VALIDATION
+                     |
+                     v
+             PRACTICE EXAM
+                     |
+                     v
+             AUTO EVALUATION
+                     |
+                     v
+            PERFORMANCE ANALYTICS
+                     |
+                     v
+               DATA STORAGE
 ```
+
+### Project Structure
+
+```text
 prepiq/
-├── client/                     # Vite + React Frontend
+│
+├── client/
+│   └── src/
+│       ├── components/
+│       │   ├── layout/
+│       │   ├── ui/
+│       │   └── test/
+│       ├── context/
+│       ├── pages/
+│       ├── services/
+│       └── types/
+│
+├── server/
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── layout/         # Navbar (Floating Liquid Glass Pill), Sidebar, Header
-│   │   │   ├── ui/             # GlassCard, Badge, Button, Modal, ProgressBar
-│   │   │   └── test/           # QuestionCard, Timer, Palette, RubricFeedback
-│   │   ├── context/            # AuthContext (JWT verification & persistence), ThemeContext
-│   │   ├── pages/              # 12 Functional SaaS Views
-│   │   ├── services/           # API Client (Authorization Bearer injection)
-│   │   └── types/              # TypeScript Schemas
-│   └── tailwind.config.js      # Brand Palette & Glass Utilities
-├── server/                     # Express Backend
-│   ├── src/
-│   │   ├── middleware/         # requireAuth, rateLimiter
-│   │   ├── utils/              # jwt.ts (sign/verify), security.ts (scrypt)
-│   │   ├── routes/             # auth, documents, generate, tests, analytics, testSuite, system
-│   │   ├── services/           # gemini, prompts, extractor, validator, evaluator, testSuiteRunner
-│   │   ├── data/               # database.ts, sampleMaterials.ts, store.json
-│   │   └── types/              # Backend Schemas
-│   └── uploads/                # Sanitized temporary file staging
-├── docs/                       # Comprehensive Technical Documentation
-│   ├── workflow.md             # 8-Stage Processing Lifecycle
-│   ├── architecture.md         # System Architecture & ERD
-│   ├── prompt-engineering.md   # Prompt V1/V2/V3 & System Prompt
-│   └── testing-report.md       # Case-by-Case Validation Audit
+│   │   ├── middleware/
+│   │   ├── utils/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   ├── data/
+│   │   └── types/
+│   ├── uploads/
+│   └── .env.example
+│
+├── docs/
+│   ├── workflow.md
+│   ├── architecture.md
+│   ├── prompt-engineering.md
+│   └── testing-report.md
+│
+├── package.json
 └── README.md
 ```
 
@@ -131,116 +232,265 @@ prepiq/
 
 ## 6. The 8-Stage Processing Workflow
 
-1. **STAGE 1 — INPUT**: Student uploads PDF, DOCX, TXT or pastes notes.
-2. **STAGE 2 — EXTRACTION**: Normalizes text and enforces character threshold (`MIN_CHARS = 100`).
-3. **STAGE 3 — ANALYSIS**: Identifies headings, section boundaries, and propositions.
-4. **STAGE 4 — QUESTION GENERATION**: Formulates questions using selected Prompt Version (V1, V2, or V3).
-5. **STAGE 5 — ANSWER GENERATION**: Generates answers, pedagogical explanations, source citations, and rubrics.
-6. **STAGE 6 — DUAL-LAYER VALIDATION**: Checks MCQ single-answer consistency, eliminates duplicates (> 80% overlap), and validates source grounding.
-7. **STAGE 7 — OUTPUT & PERSISTENCE**: Saves validated exam to persistent storage with ownership assignment.
-8. **STAGE 8 — AUTOMATED EVALUATION**: Grades student responses on submission, calculates scores, identifies weak topics, updates dashboard analytics, and records execution telemetry.
+PrepIQ follows an eight-stage workflow to transform study materials into evaluated practice examinations.
+
+| Stage | Process | Description |
+|---|---|---|
+| 1 | Input | Student uploads a PDF, DOCX, TXT file, or pastes notes. |
+| 2 | Extraction | Extracts and normalises text from the supplied material. |
+| 3 | Analysis | Identifies headings, sections, concepts, and propositions. |
+| 4 | Question Generation | Generates questions using the selected prompt version. |
+| 5 | Answer Generation | Produces answers, explanations, references, and rubrics. |
+| 6 | Validation | Checks source grounding, answer consistency, and duplicates. |
+| 7 | Output & Storage | Stores the validated examination with ownership information. |
+| 8 | Evaluation | Grades submissions, identifies weak topics, and updates analytics. |
 
 ---
 
-## 7. Prompt Engineering & Comparison
+## 7. Prompt Engineering & Validation
 
-### System Prompt Directive
-```text
-You are PrepIQ, an academic examination question generator and educational assessment assistant.
-Your task is to generate high-quality examination practice questions exclusively from the study material supplied by the user... Academic integrity and factual accuracy are more important than question quantity.
-```
+PrepIQ uses three prompt-engineering approaches to improve generated examination quality.
 
-### Three Tested Versions
+| Evaluation Metric | V1 | V2 | V3 |
+|---|---:|---:|---:|
+| Question Relevance | 82% | 93% | **98%** |
+| Answer Accuracy | 85% | 94% | **99%** |
+| Source Grounding | 78% | 89% | **98%** |
+| Duplicate Detection | 70% | 88% | **97%** |
+| Output Consistency | 84% | 92% | **98%** |
 
-| Metric | Version 1 (Baseline) | Version 2 (Context-Aware) | Version 3 (Grounded & Rubric) |
-| :--- | :---: | :---: | :---: |
-| **Question Relevance** | 82% | 93% | **98%** |
-| **Answer Accuracy** | 85% | 94% | **99%** |
-| **Source Grounding** | 78% | 89% | **98%** |
-| **Duplicate Detection** | 70% | 88% | **97%** |
-| **Output Consistency** | 84% | 92% | **98%** |
-| **Descriptive Rubrics** | None | Generalized | **Objective Checkpoints** |
+*Note: These are the evaluation figures documented for the project's prompt-version comparison. They should be interpreted in the context of the project's test methodology, not as independently verified benchmark results.*
 
----
+### Internal Validation Suite
 
-## 8. Output Validation & Test Results
+The application includes six documented academic validation scenarios:
 
-The application includes an internal test suite verifying 6 scenarios:
-
-- **TEST 1 (Normal Input)**: Generated 10 valid MCQs from OS notes with 100% grounding. `[PASSED]`
-- **TEST 2 (Edge Case - Empty Doc)**: Safely intercepted 12-character input; blocked invalid generation. `[PASSED]`
-- **TEST 3 (Unsupported Information)**: Flagged ungrounded quantum computing question; score set to 0%. `[PASSED]`
-- **TEST 4 (Duplicate Detection)**: Detected and pruned question stem with > 80% token overlap. `[PASSED]`
-- **TEST 5 (MCQ Consistency)**: Injected mismatch between choices and answer key; question rejected. `[PASSED]`
-- **TEST 6 (Incomplete Submission)**: Handled omitted questions with safe partial scoring. `[PASSED]`
+1. Normal Input — Generate valid questions from supplied study material.
+2. Empty Document — Reject insufficient input.
+3. Unsupported Information — Detect questions not supported by the source.
+4. Duplicate Detection — Identify and remove highly repetitive questions.
+5. MCQ Consistency — Reject mismatches between options and answer keys.
+6. Incomplete Submission — Handle unanswered questions during evaluation.
 
 ---
 
-## 9. Persistence Model & Cloud Deployment Guide
+## 8. Security & Authentication
 
-### Data Persistence Architecture
-PrepIQ stores application data using a concurrency-safe atomic write pattern:
-- Writes are serialized to unique temporary files and committed using atomic POSIX rename (`fs.renameSync`), eliminating risk of half-written file corruption.
-- System curriculum materials (`doc-os-001`, `doc-ml-002`, `doc-cs-003`) are seeded automatically under immutable `'system'` ownership if missing, without overwriting student accounts.
-- Data directory is configurable via the `DATA_DIR` environment variable (defaults to `server/data`).
+PrepIQ implements server-side authentication and resource ownership controls.
 
-### Deploying to Render with Persistent Disk
-1. **Ephemeral vs. Persistent Disks**:
-   - On the Render Free plan, container filesystems are **ephemeral** and reset across container restarts or new deploys.
-   - To persist data permanently on Render, attach a **Render Persistent Disk** mounted at `/app/server/data` (available on Render Starter plans and above) and set `DATA_DIR=/app/server/data`.
-2. **Required Render Environment Variables**:
-   - `NODE_ENV`: `production`
-   - `PORT`: `10000`
-   - `JWT_SECRET`: Random 64-character secret (or generated via `generateValue: true` in `render.yaml`)
-   - `CORS_ORIGIN`: `https://prepiq-upc7.onrender.com`
-   - `GEMINI_API_KEY`: *(Optional)* Your Google AI Gemini API Key.
-   - `GEMINI_MODEL`: `gemini-1.5-flash`
-   - `DATA_DIR`: *(Optional)* Mount path of persistent disk, e.g. `/app/server/data`.
+### JWT Authentication
+- Uses signed HMAC-SHA256 JWT tokens.
+- Protected API routes require `Authorization: Bearer <token>`.
+- Validates token signatures, expiry, and required claims.
+- Requires a `JWT_SECRET` of at least 32 characters.
+- Does not trust client-provided user identity headers.
+
+### Password Security
+- Passwords are hashed using Node.js `crypto.scrypt`.
+- Uses unique cryptographic salts.
+- Uses timing-safe comparison during verification.
+- Enforces password complexity requirements.
+
+### Resource Ownership
+- Protected routes validate authenticated users.
+- Users can access only their own protected resources.
+- Cross-user resource access is rejected.
+- Shared system curriculum resources are protected from unauthorised modification.
+
+### Rate Limiting
+- Authentication endpoints: 25 requests per 15-minute window per IP.
+- AI generation endpoints: 35 requests per 10-minute window per IP.
+
+### Additional Security Measures
+- Configurable CORS allowlist.
+- Security response headers.
+- File upload validation.
+- 15 MB upload size limit.
+- Filename sanitisation.
+- Session validation and logout token cleanup.
 
 ---
 
-## 10. Local Setup & Execution Instructions
+## 9. Installation & Local Setup
 
 ### Prerequisites
-- Node.js v18+ (tested on Node.js v24)
-- npm v9+
 
-### Environment Configuration
+- Node.js 18 or later.
+- npm 9 or later.
+- Git.
+- Google Gemini API key (optional, for external AI generation).
+
+### Step 1 — Clone the Repository
+
 ```bash
-cp server/.env.example server/.env
-# Edit server/.env to set your JWT_SECRET (min 32 chars) and optional GEMINI_API_KEY
+git clone https://github.com/aditya-yadav-75/prepiq.git
+
+cd prepiq
 ```
 
-### Installation & Execution
+### Step 2 — Install Dependencies
+
 ```bash
-# 1. Install dependencies across client and server
 npm run install:all
+```
 
-# 2. Run both server and client concurrently in development
+### Step 3 — Configure Environment Variables
+
+Create your environment file using the provided example:
+
+```bash
+cp server/.env.example server/.env
+```
+
+Configure the required variables:
+
+```env
+NODE_ENV=development
+PORT=5001
+
+JWT_SECRET=your_random_secret_at_least_32_characters
+
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-1.5-flash
+
+CORS_ORIGIN=http://localhost:3000
+```
+
+Use a unique, randomly generated secret for `JWT_SECRET`. Never commit real API keys or secrets to GitHub.
+
+### Step 4 — Run the Application
+
+```bash
 npm run dev
+```
 
-# 3. Or compile and run unified production build
+### Step 5 — Production Build
+
+```bash
 npm run build
+
 npm start
 ```
 
-- **Frontend Client**: `http://localhost:3000`
-- **Backend API**: `http://localhost:5001`
-- **Health Check**: `http://localhost:5001/api/health`
+### Local Development URLs
 
-### Automated Security & Validation Test Execution
-```bash
-# Run the 15-point Security and Authorization Test Harness
-cd server && npx tsx src/comprehensive_audit_test.ts
-
-# Run the 6-stage Academic Validation Invariant Suite
-node -e 'const { TestSuiteRunner } = require("./server/dist/services/testSuiteRunner.js"); TestSuiteRunner.runAllTests().then(console.log);'
-```
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:5001 |
+| Health Check | http://localhost:5001/api/health |
 
 ---
 
-## 11. Known Limitations & Future Scope
+## 10. Testing
 
-- **OCR for Hand-Drawn Diagrams**: Current extraction focuses on text, headings, and tables; future work will incorporate Gemini Vision OCR for handwritten equations and diagrams.
-- **SMTP Email Relay**: Self-service automated password reset is currently disabled because an institutional SMTP email delivery service is not configured on this environment.
-- **LMS Canvas / Moodle Integration**: Direct export of generated validated exams into QTI / SCORM formats.
+### Security & Authorisation Audit
+
+The repository includes a 15-point security and authorisation test harness.
+
+```bash
+cd server
+
+npx tsx src/comprehensive_audit_test.ts
+```
+
+### Academic Validation Suite
+
+The application also includes a six-scenario academic validation suite, accessible through the application's test-suite functionality.
+
+Testing results should be considered verified only when the relevant test commands have been executed successfully in the current environment.
+
+---
+
+## 11. Deployment
+
+PrepIQ is deployed using Render.
+
+**Live Application:** https://prepiq-upc7.onrender.com/
+
+### Deployment Environment Variables
+
+| Variable | Purpose |
+|---|---|
+| `NODE_ENV` | Production environment |
+| `PORT` | Server port |
+| `JWT_SECRET` | Server-side JWT signing secret |
+| `CORS_ORIGIN` | Allowed production frontend origin |
+| `GEMINI_API_KEY` | Google Gemini API key |
+| `GEMINI_MODEL` | Gemini model selection |
+| `DATA_DIR` | Optional persistent storage directory |
+
+### Important: Data Persistence
+
+The current application uses JSON-based file storage.
+
+Render's default filesystem on the Free plan is ephemeral. Data stored there may be lost after a restart or redeployment.
+
+For persistent user data, configure a Render Persistent Disk on a supported paid plan, mount it at:
+
+```text
+/app/server/data
+```
+
+Then configure:
+
+```env
+DATA_DIR=/app/server/data
+```
+
+A managed database would be a suitable future improvement for a larger deployment.
+
+---
+
+## 12. Known Limitations & Future Scope
+
+PrepIQ is an evolving academic productivity project. The following improvements are planned:
+
+- **Handwritten Content Recognition:** Add OCR support for handwritten notes, equations, and diagrams.
+- **Automated Password Reset:** Integrate institutional SMTP or an email delivery service.
+- **LMS Integration:** Support Moodle and other Learning Management Systems.
+- **Advanced Analytics:** Add deeper learning-pattern analysis and personalised study recommendations.
+- **Database Migration:** Move from JSON-based storage to a managed database.
+- **Scalability:** Introduce shared storage and distributed rate limiting for multi-instance deployments.
+- **Export Support:** Enable examination export in standard academic formats.
+
+---
+
+## 13. Project Documentation
+
+Additional technical documentation is available in the repository:
+
+| Document | Description |
+|---|---|
+| `docs/workflow.md` | Application processing lifecycle |
+| `docs/architecture.md` | System architecture and ERD |
+| `docs/prompt-engineering.md` | Prompt versions and engineering approach |
+| `docs/testing-report.md` | Validation and testing documentation |
+
+---
+
+## 14. Author
+
+**Aditya Yadav**
+
+B.Tech Computer Science & Engineering
+
+- GitHub: https://github.com/aditya-yadav-75
+- LinkedIn: https://www.linkedin.com/in/adityayadav75official/
+- Project: https://github.com/aditya-yadav-75/prepiq
+
+---
+
+## 15. Acknowledgements
+
+- Google Gemini for AI-powered question generation.
+- The open-source React and Node.js ecosystems.
+- The libraries and tools used throughout the development of PrepIQ.
+
+---
+
+<p align="center">
+  <strong>PrepIQ — Study smarter. Practice sharper.</strong>
+  <br />
+  Built to make exam preparation more focused, structured, and effective.
+</p>
