@@ -260,31 +260,41 @@ Academic integrity and factual accuracy are more important than question quantit
               tradeoffs: 'Highest academic fidelity and auditability; zero unsupported assertions.'
             }
           ].map((v, i) => (
-            <GlassCard key={i} className="p-6 sm:p-8 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-cobalt text-white">{v.version}</span>
-                  <h3 className="text-lg font-bold text-darkText dark:text-white">{v.title}</h3>
+            <GlassCard key={i} className="p-6 sm:p-8 space-y-6">
+              {/* Version Card Header - Properly Aligned Flex Layout */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100/90 dark:border-white/10">
+                <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
+                  <span className="shrink-0 text-xs font-black px-2.5 py-1 rounded-lg bg-cobalt text-white shadow-xs">
+                    {v.version}
+                  </span>
+                  <h3 className="text-base sm:text-lg font-bold text-darkText dark:text-white tracking-tight leading-snug break-words">
+                    {v.title}
+                  </h3>
                 </div>
-                <Badge variant={i === 2 ? 'lime' : 'slate'} size="sm">{v.badge}</Badge>
+                <div className="shrink-0 self-start sm:self-center">
+                  <Badge variant={i === 2 ? 'lime' : 'slate'} size="sm" className="whitespace-nowrap shadow-xs">
+                    {v.badge}
+                  </Badge>
+                </div>
               </div>
 
+              {/* 4 Information Panels - Consistent Two-Column Grid with Equal Card Heights */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 space-y-1">
-                  <p className="font-bold text-darkText dark:text-white uppercase tracking-wider text-[10px]">Architectural Focus</p>
-                  <p className="text-mutedText dark:text-slate-400 leading-relaxed">{v.focus}</p>
+                <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-200/80 dark:border-white/10 flex flex-col justify-start h-full space-y-1.5 shadow-xs transition-colors">
+                  <p className="font-bold text-cobalt dark:text-neon-lime uppercase tracking-wider text-[10px]">Architectural Focus</p>
+                  <p className="text-mutedText dark:text-slate-300 leading-relaxed text-xs">{v.focus}</p>
                 </div>
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 space-y-1">
-                  <p className="font-bold text-darkText dark:text-white uppercase tracking-wider text-[10px]">Task Decomposition</p>
-                  <p className="text-mutedText dark:text-slate-400 leading-relaxed">{v.decomposition}</p>
+                <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-200/80 dark:border-white/10 flex flex-col justify-start h-full space-y-1.5 shadow-xs transition-colors">
+                  <p className="font-bold text-cobalt dark:text-neon-lime uppercase tracking-wider text-[10px]">Task Decomposition</p>
+                  <p className="text-mutedText dark:text-slate-300 leading-relaxed text-xs">{v.decomposition}</p>
                 </div>
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 space-y-1">
-                  <p className="font-bold text-darkText dark:text-white uppercase tracking-wider text-[10px]">JSON Schema Features</p>
-                  <p className="text-mutedText dark:text-slate-400 leading-relaxed">{v.schema}</p>
+                <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-200/80 dark:border-white/10 flex flex-col justify-start h-full space-y-1.5 shadow-xs transition-colors">
+                  <p className="font-bold text-cobalt dark:text-neon-lime uppercase tracking-wider text-[10px]">JSON Schema Features</p>
+                  <p className="text-mutedText dark:text-slate-300 leading-relaxed text-xs">{v.schema}</p>
                 </div>
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 space-y-1">
-                  <p className="font-bold text-darkText dark:text-white uppercase tracking-wider text-[10px]">Evaluation Trade-offs</p>
-                  <p className="text-mutedText dark:text-slate-400 leading-relaxed">{v.tradeoffs}</p>
+                <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-200/80 dark:border-white/10 flex flex-col justify-start h-full space-y-1.5 shadow-xs transition-colors">
+                  <p className="font-bold text-cobalt dark:text-neon-lime uppercase tracking-wider text-[10px]">Evaluation Trade-offs</p>
+                  <p className="text-mutedText dark:text-slate-300 leading-relaxed text-xs">{v.tradeoffs}</p>
                 </div>
               </div>
             </GlassCard>
